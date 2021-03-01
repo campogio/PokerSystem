@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<meta>
+  <info name="WiredPlayers" author="Xabi" type="gamemode" />
+
+  <!-- Gamemode library -->
+  <script src="bin/Debug/netcoreapp3.1/WiredPlayers.dll" />
+
+  <settings>
+    <!-- Database host, 127.0.0.1 if localhost -->
+    <setting name="host" value="127.0.0.1" />
+    <!-- Database username -->
+    <setting name="username" value="root" />
+    <!-- Database password -->
+    <setting name="password" value="" />
+    <!-- Database name -->
+    <setting name="database" value="svrp-base" />
+    <!-- Can take NONE or REQUIRED values -->
+    <setting name="ssl" value="NONE"/>
+
+    <!-- Gamemode language settings -->
+    <setting name="culture" value="en-EN" />
+
+    <!-- Application form -->
+    <!-- 0: None, 1: Ingame, 2: External -->
+    <setting name ="application" value="0" />
+  </settings>
+
+</meta>

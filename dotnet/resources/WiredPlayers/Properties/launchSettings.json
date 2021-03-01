@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WiredPlayers": {
+      "commandName": "Executable",
+      "executablePath": "C:\\RAGEMP\\server-files\\ragemp-server.exe"
+    }
+  }
+}

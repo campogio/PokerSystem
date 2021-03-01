@@ -1,0 +1,75 @@
+﻿* {
+    outline: none;
+    color: white;
+	text-decoration: none;
+    box-sizing: border-box;
+    font-family: Myriad Pro, Open Sans, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.player-panel {
+	display: inline-block;
+	position: absolute;
+	width: 30vw;
+	height: 60vh;
+	top: 20vh;
+	left: 37vw;
+	overflow-y: hidden;
+	background-color: rgba(0, 0, 0, 0.75);
+}
+
+.player-heading {
+	display: inline-block;
+	height: 3vh;
+}
+
+.heading-left {
+	display: inline-block;
+	vertical-align: middle;
+	padding-left: 5px;
+	line-height: 3vh;
+	width: 28vw;
+}
+
+.heading-right {
+	display: inline-block;
+}
+
+.heading-right img {
+	margin-top: 0.5vh;
+	height: 2vh;
+}
+
+.player-fields {
+	height: 4vh;
+	font-weight: bolder;
+	border-bottom: 1px white solid;
+	background-color: rgba(20, 20, 20, 0.85);
+}
+
+.player-fields div {
+	text-align: center;
+	line-height: 4vh;
+}
+
+.player-id,
+.player-ping {
+	display: inline-block;
+	width: 4.2vw;
+}
+
+.player-name {
+	display: inline-block;
+	width: 20vw;
+}
+
+.player-container {
+	padding: 5px;
+	height: 57vh;
+	overflow-y: auto !important;
+}
+
+.player-container > div {
+	height: 4vh;
+	padding: 5px 0px;
+}

@@ -1,0 +1,17 @@
+{
+  "maxplayers": 100,
+  "name": "South Valley Roleplay Base",
+  "url": "www.svrp.it",
+  "gamemode": "roleplay",
+  "stream-distance": 600.0,
+  "announce": false,
+  "language": "it",
+  "enable-nodejs": false,
+  "csharp": true,
+  "voice-chat": true,
+  "voice-chat-sample-rate": 48000,
+  "port": 22005,
+  "fqdn": "server.svrp.it",
+  "api-threading-debugging": false,
+  "sync-rate": 40
+} 

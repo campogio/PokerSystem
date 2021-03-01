@@ -1,0 +1,531 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="a" xml:space="preserve">
+    <value>a</value>
+  </data>
+  <data name="accept" xml:space="preserve">
+    <value>aceptar</value>
+  </data>
+  <data name="admin" xml:space="preserve">
+    <value>aviso</value>
+  </data>
+  <data name="ame" xml:space="preserve">
+    <value>ame</value>
+  </data>
+  <data name="announce" xml:space="preserve">
+    <value>anunciar</value>
+  </data>
+  <data name="answer" xml:space="preserve">
+    <value>contestar</value>
+  </data>
+  <data name="attend" xml:space="preserve">
+    <value>atender</value>
+  </data>
+  <data name="a_duty" xml:space="preserve">
+    <value>aservicio</value>
+  </data>
+  <data name="a_ticket" xml:space="preserve">
+    <value>rduda</value>
+  </data>
+  <data name="ban" xml:space="preserve">
+    <value>ban</value>
+  </data>
+  <data name="breathalyzer" xml:space="preserve">
+    <value>alcoholimetro</value>
+  </data>
+  <data name="bring" xml:space="preserve">
+    <value>traer</value>
+  </data>
+  <data name="business" xml:space="preserve">
+    <value>negocio</value>
+  </data>
+  <data name="cancel" xml:space="preserve">
+    <value>cancelar</value>
+  </data>
+  <data name="character" xml:space="preserve">
+    <value>personaje</value>
+  </data>
+  <data name="check" xml:space="preserve">
+    <value>comprobar</value>
+  </data>
+  <data name="clear_reports" xml:space="preserve">
+    <value>borraraviso</value>
+  </data>
+  <data name="complement" xml:space="preserve">
+    <value>complemento</value>
+  </data>
+  <data name="computer" xml:space="preserve">
+    <value>ordenador</value>
+  </data>
+  <data name="consume" xml:space="preserve">
+    <value>consumir</value>
+  </data>
+  <data name="contacts" xml:space="preserve">
+    <value>agenda</value>
+  </data>
+  <data name="control" xml:space="preserve">
+    <value>control</value>
+  </data>
+  <data name="coord" xml:space="preserve">
+    <value>coord</value>
+  </data>
+  <data name="cut_interview" xml:space="preserve">
+    <value>cortardirecto</value>
+  </data>
+  <data name="ed" xml:space="preserve">
+    <value>de</value>
+  </data>
+  <data name="deliver" xml:space="preserve">
+    <value>repartir</value>
+  </data>
+  <data name="die" xml:space="preserve">
+    <value>morir</value>
+  </data>
+  <data name="disconnect" xml:space="preserve">
+    <value>desconectar</value>
+  </data>
+  <data name="dismiss" xml:space="preserve">
+    <value>expulsar</value>
+  </data>
+  <data name="do" xml:space="preserve">
+    <value>do</value>
+  </data>
+  <data name="door" xml:space="preserve">
+    <value>puerta</value>
+  </data>
+  <data name="pd" xml:space="preserve">
+    <value>dp</value>
+  </data>
+  <data name="driving_school" xml:space="preserve">
+    <value>autoescuela</value>
+  </data>
+  <data name="drop" xml:space="preserve">
+    <value>tirar</value>
+  </data>
+  <data name="duty" xml:space="preserve">
+    <value>deservicio</value>
+  </data>
+  <data name="equipment" xml:space="preserve">
+    <value>equipo</value>
+  </data>
+  <data name="extract" xml:space="preserve">
+    <value>extraer</value>
+  </data>
+  <data name="f" xml:space="preserve">
+    <value>f</value>
+  </data>
+  <data name="fill" xml:space="preserve">
+    <value>rellenar</value>
+  </data>
+  <data name="fine" xml:space="preserve">
+    <value>multa</value>
+  </data>
+  <data name="fish" xml:space="preserve">
+    <value>pescar</value>
+  </data>
+  <data name="force" xml:space="preserve">
+    <value>forzar</value>
+  </data>
+  <data name="fr" xml:space="preserve">
+    <value>fr</value>
+  </data>
+  <data name="frequency" xml:space="preserve">
+    <value>frecuencia</value>
+  </data>
+  <data name="frisk" xml:space="preserve">
+    <value>cachear</value>
+  </data>
+  <data name="furniture" xml:space="preserve">
+    <value>muebles</value>
+  </data>
+  <data name="garbage" xml:space="preserve">
+    <value>basurero</value>
+  </data>
+  <data name="give" xml:space="preserve">
+    <value>ceder</value>
+  </data>
+  <data name="gun" xml:space="preserve">
+    <value>arma</value>
+  </data>
+  <data name="handcuff" xml:space="preserve">
+    <value>esposar</value>
+  </data>
+  <data name="hang" xml:space="preserve">
+    <value>colgar</value>
+  </data>
+  <data name="heal" xml:space="preserve">
+    <value>curar</value>
+  </data>
+  <data name="health" xml:space="preserve">
+    <value>vida</value>
+  </data>
+  <data name="help" xml:space="preserve">
+    <value>ayuda</value>
+  </data>
+  <data name="hood" xml:space="preserve">
+    <value>capo</value>
+  </data>
+  <data name="hotwire" xml:space="preserve">
+    <value>puente</value>
+  </data>
+  <data name="house" xml:space="preserve">
+    <value>casa</value>
+  </data>
+  <data name="incriminate" xml:space="preserve">
+    <value>inculpar</value>
+  </data>
+  <data name="info" xml:space="preserve">
+    <value>info</value>
+  </data>
+  <data name="interview" xml:space="preserve">
+    <value>entrevistar</value>
+  </data>
+  <data name="inventory" xml:space="preserve">
+    <value>inventario</value>
+  </data>
+  <data name="jail" xml:space="preserve">
+    <value>jail</value>
+  </data>
+  <data name="job" xml:space="preserve">
+    <value>empleo</value>
+  </data>
+  <data name="keys" xml:space="preserve">
+    <value>llaves</value>
+  </data>
+  <data name="kick" xml:space="preserve">
+    <value>kick</value>
+  </data>
+  <data name="kick_all" xml:space="preserve">
+    <value>kickall</value>
+  </data>
+  <data name="license" xml:space="preserve">
+    <value>licencia</value>
+  </data>
+  <data name="licenses" xml:space="preserve">
+    <value>licencias</value>
+  </data>
+  <data name="locate" xml:space="preserve">
+    <value>localizar</value>
+  </data>
+  <data name="lock" xml:space="preserve">
+    <value>bloqueo</value>
+  </data>
+  <data name="luck" xml:space="preserve">
+    <value>suerte</value>
+  </data>
+  <data name="me" xml:space="preserve">
+    <value>me</value>
+  </data>
+  <data name="megaphone" xml:space="preserve">
+    <value>megafono</value>
+  </data>
+  <data name="members" xml:space="preserve">
+    <value>miembros</value>
+  </data>
+  <data name="news" xml:space="preserve">
+    <value>n</value>
+  </data>
+  <data name="ooc" xml:space="preserve">
+    <value>ooc</value>
+  </data>
+  <data name="orders" xml:space="preserve">
+    <value>pedidos</value>
+  </data>
+  <data name="park" xml:space="preserve">
+    <value>aparcar</value>
+  </data>
+  <data name="parking" xml:space="preserve">
+    <value>parking</value>
+  </data>
+  <data name="pawn" xml:space="preserve">
+    <value>empeñar</value>
+  </data>
+  <data name="pay" xml:space="preserve">
+    <value>pagar</value>
+  </data>
+  <data name="pick_up" xml:space="preserve">
+    <value>recoger</value>
+  </data>
+  <data name="plant" xml:space="preserve">
+    <value>plantar</value>
+  </data>
+  <data name="player" xml:space="preserve">
+    <value>jugador</value>
+  </data>
+  <data name="pm" xml:space="preserve">
+    <value>mp</value>
+  </data>
+  <data name="points" xml:space="preserve">
+    <value>puntos</value>
+  </data>
+  <data name="pos" xml:space="preserve">
+    <value>pos</value>
+  </data>
+  <data name="prize" xml:space="preserve">
+    <value>premiar</value>
+  </data>
+  <data name="purchase" xml:space="preserve">
+    <value>comprar</value>
+  </data>
+  <data name="put" xml:space="preserve">
+    <value>poner</value>
+  </data>
+  <data name="r" xml:space="preserve">
+    <value>r</value>
+  </data>
+  <data name="rank" xml:space="preserve">
+    <value>rango</value>
+  </data>
+  <data name="reanimate" xml:space="preserve">
+    <value>reanimar</value>
+  </data>
+  <data name="recoff" xml:space="preserve">
+    <value>recoff</value>
+  </data>
+  <data name="recon" xml:space="preserve">
+    <value>recon</value>
+  </data>
+  <data name="recruit" xml:space="preserve">
+    <value>reclutar</value>
+  </data>
+  <data name="refuel" xml:space="preserve">
+    <value>repostar</value>
+  </data>
+  <data name="reinforces" xml:space="preserve">
+    <value>refuerzos</value>
+  </data>
+  <data name="remove" xml:space="preserve">
+    <value>quitar</value>
+  </data>
+  <data name="rent" xml:space="preserve">
+    <value>alquilar</value>
+  </data>
+  <data name="rentable" xml:space="preserve">
+    <value>alquilable</value>
+  </data>
+  <data name="repaint" xml:space="preserve">
+    <value>repintar</value>
+  </data>
+  <data name="repair" xml:space="preserve">
+    <value>reparar</value>
+  </data>
+  <data name="reports" xml:space="preserve">
+    <value>avisos</value>
+  </data>
+  <data name="revive" xml:space="preserve">
+    <value>revivir</value>
+  </data>
+  <data name="save" xml:space="preserve">
+    <value>save</value>
+  </data>
+  <data name="say" xml:space="preserve">
+    <value>decir</value>
+  </data>
+  <data name="scrap" xml:space="preserve">
+    <value>desguazar</value>
+  </data>
+  <data name="seatbelt" xml:space="preserve">
+    <value>cinturon</value>
+  </data>
+  <data name="sell" xml:space="preserve">
+    <value>vender</value>
+  </data>
+  <data name="service" xml:space="preserve">
+    <value>servicio</value>
+  </data>
+  <data name="show" xml:space="preserve">
+    <value>mostrar</value>
+  </data>
+  <data name="shower" xml:space="preserve">
+    <value>ducharse</value>
+  </data>
+  <data name="siren" xml:space="preserve">
+    <value>sirena</value>
+  </data>
+  <data name="skin" xml:space="preserve">
+    <value>skin</value>
+  </data>
+  <data name="sms" xml:space="preserve">
+    <value>sms</value>
+  </data>
+  <data name="speak" xml:space="preserve">
+    <value>hablar</value>
+  </data>
+  <data name="steal" xml:space="preserve">
+    <value>robar</value>
+  </data>
+  <data name="store" xml:space="preserve">
+    <value>guardar</value>
+  </data>
+  <data name="ticket" xml:space="preserve">
+    <value>duda</value>
+  </data>
+  <data name="tickets" xml:space="preserve">
+    <value>dudas</value>
+  </data>
+  <data name="town_hall" xml:space="preserve">
+    <value>ayuntamiento</value>
+  </data>
+  <data name="tp" xml:space="preserve">
+    <value>tpa</value>
+  </data>
+  <data name="trunk" xml:space="preserve">
+    <value>maletero</value>
+  </data>
+  <data name="tunning" xml:space="preserve">
+    <value>tunning</value>
+  </data>
+  <data name="unpark" xml:space="preserve">
+    <value>desaparcar</value>
+  </data>
+  <data name="unrent" xml:space="preserve">
+    <value>desalquilar</value>
+  </data>
+  <data name="vehicle" xml:space="preserve">
+    <value>vehiculo</value>
+  </data>
+  <data name="wardrobe" xml:space="preserve">
+    <value>armario</value>
+  </data>
+  <data name="weapons_event" xml:space="preserve">
+    <value>armarios</value>
+  </data>
+  <data name="weather" xml:space="preserve">
+    <value>clima</value>
+  </data>
+  <data name="welcome" xml:space="preserve">
+    <value>bienvenida</value>
+  </data>
+  <data name="whisper" xml:space="preserve">
+    <value>susurrar</value>
+  </data>
+  <data name="yell" xml:space="preserve">
+    <value>gritar</value>
+  </data>
+  <data name="go" xml:space="preserve">
+    <value>ir</value>
+  </data>
+  <data name="silence" xml:space="preserve">
+    <value>silencio</value>
+  </data>
+  <data name="interior" xml:space="preserve">
+    <value>interior</value>
+  </data>
+</root>

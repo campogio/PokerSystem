@@ -2,6 +2,7 @@ using GTANetworkAPI;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using SouthValleyFive.poker;
 
 namespace WiredPlayers.Data
 {
@@ -97,6 +98,9 @@ namespace WiredPlayers.Data
 
             // Special permission loading
             DatabaseOperations.LoadAllPermissions();
+
+            // Load Poker tables and seats
+            Poker.GeneratePokerTables();
         }
 
         public static MySqlCommand GenerateCommand(MySqlConnection connection, string query, Dictionary<string, object> parameters)

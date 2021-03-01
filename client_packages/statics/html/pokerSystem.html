@@ -1,0 +1,186 @@
+<html lang="it">
+    <head>
+        <meta charset="utf8">
+        <title>Poker System - SVRP</title>
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <!-- Bootstrap Slider -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/11.0.2/css/bootstrap-slider.min.css" integrity="sha512-3q8fi8M0VS+X/3n64Ndpp6Bit7oXSiyCnzmlx6IDBLGlY5euFySyJ46RUlqIVs0DPCGOypqP8IRk/EyPvU28mQ==" crossorigin="anonymous" />
+        <!-- JQuery Confirm -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css" integrity="sha512-0V10q+b1Iumz67sVDL8LPFZEEavo6H/nBSyghr7mm9JEQkOAm91HNoZQRvQdjennBb/oEuW+8oZHVpIKq+d25g==" crossorigin="anonymous" />
+        <!-- Poker System CSS -->
+        <link rel="stylesheet" href="../css/pokerSystem.css" />
+    </head>
+
+    <body>
+        <div class="container-fluid">
+            <!-- 1 row, 3 col, 3 row for each col -->
+            <div class="row">
+                <div class="col-3 full-height">
+                    <div class="row">
+                        <!--OLD FICHES<div class="col fiches-col">
+                            <h1 class="text text-center fiches-text">FICHES<br/><span id="fichesAmount">500238</span><img class="fiches-icon" src="../img/pokerGame/fiches.png" /></h1>
+                        </div>-->
+                    </div>
+                </div>
+                <div class="col-6 full-height d-flex justify-content-center">
+                    <div class="row tablecards-row">
+                        <!-- TABLE CARDS -->
+                        <!-- Card 1 -->
+                        <div class="col tablecards-col">
+                            <div class="flip-card table-card">
+                                <div id="tableCard1" class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <img class="card table-card" src="../img/pokerGame/card_back.png" />
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <img id="tableCard1-img" class="card table-card" src="../img/pokerGame/10C.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="col tablecards-col">
+                            <div class="flip-card table-card">
+                                <div id="tableCard2" class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <img class="card table-card" src="../img/pokerGame/card_back.png" />
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <img id="tableCard2-img" class="card table-card" src="../img/pokerGame/10C.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="col tablecards-col">
+                            <div class="flip-card table-card">
+                                <div id="tableCard3" class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <img class="card table-card" src="../img/pokerGame/card_back.png" />
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <img id="tableCard3-img" class="card table-card" src="../img/pokerGame/10C.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 4 -->
+                        <div class="col tablecards-col">
+                            <div class="flip-card table-card">
+                                <div id="tableCard4" class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <img class="card table-card" src="../img/pokerGame/card_back.png" />
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <img id="tableCard4-img" class="card table-card" src="../img/pokerGame/10C.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 5 -->
+                        <div class="col tablecards-col">
+                            <div class="flip-card table-card">
+                                <div id="tableCard5" class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <img class="card table-card" src="../img/pokerGame/card_back.png" />
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <img id="tableCard5-img" class="card table-card" src="../img/pokerGame/10C.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- POT AMOUNT -->
+                    <div class="col pot-col">
+                        <h1 class="text text-center"><span id="potAmount">500.238</span> <img class="fiches-icon" src="../img/pokerGame/fiches.png" /></h1>
+                    </div>
+                    <!-- WAITING MESSAGE -->
+                    <h1 id="textWait" class="text-waiting text-center hidden">Partita di Poker già in corso, attendi la fine del turno!</h1>
+                    <h1 id="textVictory" class="text-victory text-center hidden"><div class="star-box"><img class="star" src="../img/pokerGame/poker.png"></div> Complimenti! Hai vinto <span id="fichesWon">500</span> fiches in questa mano. <img class="star" src="../img/pokerGame/poker.png"></h1>
+                    <h1 id="textDefeat" class="text-defeat text-center hidden"><img class="star" src="../img/pokerGame/poker.png"> <b><span id="defeatName"></span></b> ha vinto <span id="defeatFiches"></span> fiches in questa mano. <img class="star" src="../img/pokerGame/poker.png"></h1>
+                    <h2 id="textNextRound" class="text-nextround text-center hidden">Una nuova partita inizierà tra <span id="replayTimer">10</span> secondi.</h2>
+                    <div class="row slider-row w-100">
+                        <!-- RAISE SLIDER -->
+                        <div class="col d-flex justify-content-center">
+                            <div class="slider-container">
+                                <!-- DECREASE RAISE BUTTON -->
+                                <button type="button" id="decreaseRaise" class="btn btn-success d-flex align-items-center" onclick="decreaseRaise()">-</button>
+                                <!-- MINIMUM RAISE VALUE -->
+                                <span id="minRaise">500</span>
+                                <span id="minRaiseSpace"></span>
+                                <!-- SLIDER -->
+                                <input id="pokerSlider" data-slider-id='raiseSlider' type="text" data-slider-handle="custom" />
+                                <!-- MAXIMUM RAISE VALUE -->
+                                <span id="maxRaiseSpace"></span>
+                                <span id="maxRaise">342.234</span>
+                                <!-- INCREASE RAISE BUTTON -->
+                                <button type="button" id="increaseRaise" class="btn btn-success d-flex align-items-center" onclick="increaseRaise()">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="actions" class="row actionbuttons-row w-100">
+                        <div class="col actionbuttons">
+                            <!-- ACTION: CALL/RAISE/FOLD BUTTONS -->
+                            <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
+                                <button type="button" id="btnCall" class="btn-xl btn-secondary" onclick="pokerCall()">CALL<br/><span id="currentCall">500</span><img class="fiches-icon-actions" src="../img/pokerGame/fiches.png" /></button>
+                                <button type="button" id="btnRaise" class="btn-xl btn-secondary" onclick="pokerRaise()">RAISE<br/><span id="currentRaise">0</span><img class="fiches-icon-actions" src="../img/pokerGame/fiches.png" /></button>
+                                <button type="button" id="btnFold" class="btn-xl btn-secondary" onclick="pokerFold()">FOLD<br/><span>&nbsp;</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 full-height">
+                    <div class="row">
+                        <!--OLD PIATTO<div class="col pot-col">
+                            <h1 class="text text-center">PIATTO<br/><span id="potAmount">500238</span><img class="fiches-icon" src="../img/pokerGame/fiches.png" /></h1>
+                        </div>-->
+                        <!-- ACTION: LEAVE BUTTON -->
+                        <button type="button" class="btn btn-secondary leavebutton" onclick="pokerLeave()">LASCIA IL TAVOLO</button>
+                    </div>
+                    <div id="pocketCards" class="row pocketcards-row">
+                        <!-- POCKET CARDS -->
+                        <!-- Card 1 -->
+                        <div class="col pocketcards-col">
+                            <div class="flip-card">
+                                <div id="pocketCard1" class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <img class="card" src="../img/pokerGame/card_back.png" />
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <img id="pocketCard1-img"  class="card" src="../img/pokerGame/10C.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="col pocketcards-col">
+                            <div class="flip-card">
+                                <div id="pocketCard2" class="flip-card-inner">
+                                    <div class="flip-card-front">
+                                        <img class="card" src="../img/pokerGame/card_back.png" />
+                                    </div>
+                                    <div class="flip-card-back">
+                                        <img id="pocketCard2-img" class="card" src="../img/pokerGame/10C.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js" integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf" crossorigin="anonymous"></script>
+    <!-- Bootstrap Slider JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/11.0.2/bootstrap-slider.min.js" integrity="sha512-f0VlzJbcEB6KiW8ZVtL+5HWPDyW1+nJEjguZ5IVnSQkvZbwBt2RfCBY0CBO1PsMAqxxrG4Di6TfsCPP3ZRwKpA==" crossorigin="anonymous"></script>
+    <!-- JQuery Confirm JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js" integrity="sha512-zP5W8791v1A6FToy+viyoyUUyjCzx+4K8XZCKzW28AnCoepPNIXecxh9mvGuy3Rt78OzEsU+VCvcObwAMvBAww==" crossorigin="anonymous"></script>    <!-- Poker System JS -->
+    <!-- Poker System JS -->
+    <script src="../js/pokerSystem.js" type="text/javascript"></script>
+</html>

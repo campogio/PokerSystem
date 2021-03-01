@@ -927,4 +927,7 @@
   <data name="item_not_sellable" xml:space="preserve">
     <value>You can't sell this item here.</value>
   </data>
+  <data name="poker_table_full" xml:space="preserve">
+    <value>Il tavolo è pieno.</value>
+  </data>
 </root>

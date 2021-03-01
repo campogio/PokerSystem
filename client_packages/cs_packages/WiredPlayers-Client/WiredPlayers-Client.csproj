@@ -14,8 +14,8 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:\RAGEMP\server-files\dotnet\runtime\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="rage-sharp">
-      <HintPath>C:\RAGEMP\dotnet\rage-sharp.dll</HintPath>
+    <Reference Include="rage-sharpN">
+      <HintPath>bin\Debug\netcoreapp3.1\rage-sharpN.dll</HintPath>
     </Reference>
   </ItemGroup>
 

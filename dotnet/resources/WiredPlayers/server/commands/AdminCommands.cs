@@ -25,6 +25,8 @@ using WiredPlayers.Buildings.Houses;
 using WiredPlayers.Buildings;
 using static WiredPlayers.Utility.Enumerators;
 using WiredPlayers.Data.Temporary;
+using SouthValleyFive.poker;
+using SouthValleyFive.data.persistent;
 
 namespace WiredPlayers.Server.Commands
 {
@@ -1843,6 +1845,134 @@ namespace WiredPlayers.Server.Commands
 
             // The action was not found
             player.SendChatMessage(Constants.COLOR_HELP + HelpRes.points);
+        }
+
+        [Command("createpokertable")]
+        public static void CreatePokerTableCommand(Player player)
+        {
+            //if (await DatabaseOperations.IsAccountAdmin(player) < StaffRank.Administrator)
+            //    return;
+
+            NAPI.Task.Run(() =>
+            {
+                try
+                {
+                    DatabaseOperations.AddPokerTable(player.Position, player.Dimension);
+                    NAPI.TextLabel.CreateTextLabel("/poker [Fiches]", player.Position, 2.5f, 0.5f, 4, new Color(190, 235, 100), false, player.Dimension);
+                    NAPI.TextLabel.CreateTextLabel("Digita il comando per entrare al tavolo", new Vector3(player.Position.X, player.Position.Y, player.Position.Z - 0.1f), 4.0f, 0.5f, 4, new Color(255, 255, 255), false, player.Dimension);
+
+                    //Admin.SendAdminMessage(StaffRank.Moderator, $"{player.Name} ha creato un nuovo tavolo da poker.");
+                }
+                catch (Exception e)
+                {
+                    NAPI.Util.ConsoleOutput(e.StackTrace);
+                }
+            });
+
+
+
+        }
+        [Command("deletepokertable", "USO: /deletepokertable [ID Tavolo]")]
+        public static void DeletePokerTableCommand(Player player, int id)
+        {
+
+            //if (await DatabaseOperations.IsAccountAdmin(player) < StaffRank.Administrator)
+            //    return;
+            NAPI.Task.Run(() =>
+            {
+                try
+                {
+                    DatabaseOperations.DeleteSingleRow("poker_tables", "id", id);
+                    Poker.PokerTables.RemoveAll(p => p.Id == id);
+                    //Admin.SendAdminMessage(StaffRank.Moderator, $"{player.Name} ha rimosso un tavolo da poker.");
+                }
+                catch (Exception e)
+                {
+                    NAPI.Util.ConsoleOutput(e.StackTrace);
+                }
+            });
+
+
+
+        }
+        [Command("addpokersit", "USO: /addpokersit [ID Tavolo]")]
+        public static void AddPokerSitCommand(Player player, int id)
+        {
+
+            //if (await DatabaseOperations.IsAccountAdmin(player) < StaffRank.Administrator)
+            //    return;
+
+            NAPI.Task.Run(() =>
+            {
+                try
+                {
+                    DatabaseOperations.AddPokerSits(id, player.Position, player.Rotation);
+                    //Admin.SendAdminMessage(StaffRank.Moderator, $"{player.Name} ha aggiunto un nuovo posto ad un tavolo da poker.");
+                }
+                catch (Exception e)
+                {
+                    NAPI.Util.ConsoleOutput(e.StackTrace);
+                }
+            });
+
+
+        }
+        [Command("removepokersit", "USO: /removepokersit [ID Tavolo] [ID Seduta]")]
+        public static void RemovePokerSitCommand(Player player, int tableId, int sitId)
+        {
+
+            //if (await DatabaseOperations.IsAccountAdmin(player) < StaffRank.Administrator)
+            //    return;
+
+            NAPI.Task.Run(() =>
+            {
+                try
+                {
+                    DatabaseOperations.DeleteSingleRow("poker_sits", "id", sitId);
+                    Poker.PokerTables.Single(p => p.Id == tableId).Sits.RemoveAll(s => s.Id == sitId);
+                    //Admin.SendAdminMessage(StaffRank.Moderator, $"{player.Name} ha rimosso un posto ad un tavolo da poker.");
+                }
+                catch (Exception e)
+                {
+                    NAPI.Util.ConsoleOutput(e.StackTrace);
+                }
+            });
+
+
+        }
+        [Command("listpokertables")]
+        public static void ListPokerTableCommand(Player player)
+        {
+
+            //if (await DatabaseOperations.IsAccountAdmin(player) < StaffRank.Administrator)
+            //    return;
+
+            NAPI.Task.Run(() =>
+            {
+                try
+                {
+                    player.SendChatMessage("[TAVOLI DA POKER]");
+                    foreach (PokerTable pokerTable in Poker.PokerTables)
+                    {
+                        player.SendChatMessage("[Tavolo(" + pokerTable.Id + ")");
+                        if (pokerTable.Sits.Count == 0)
+                        {
+                            player.SendChatMessage("Nessuna seduta associata");
+                            continue;
+                        }
+                        foreach (PokerTableSit sit in pokerTable.Sits)
+                        {
+                            player.SendChatMessage("[Tavolo(" + sit.Id + ")");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    NAPI.Util.ConsoleOutput(e.StackTrace);
+                }
+            });
+
+
         }
     }
 }

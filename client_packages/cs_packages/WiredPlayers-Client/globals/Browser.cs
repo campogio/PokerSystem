@@ -17,72 +17,132 @@ namespace WiredPlayers_Client.globals
 
         public Browser()
         {
-            Events.Add("destroyBrowser", DestroyBrowserEvent);
-            
-            Events.OnBrowserDomReady += OnBrowserDomReady;
+            try
+            {
+                Events.Add("destroyBrowser", DestroyBrowserEvent);
+
+                Events.OnBrowserDomReady += OnBrowserDomReady;
+            }
+            catch (Exception e)
+            {
+                RAGE.Ui.Console.Log(ConsoleVerbosity.Info, e.StackTrace, true);
+            }
         }
 
         public static void CreateBrowser(string html, string closingFunction, params object[] args)
         {
-            if (CustomBrowser == null)
+            try
             {
-                // Get the closing function
-                ClosingEvent = closingFunction;
+                if (CustomBrowser == null)
+                {
+                    // Get the closing function
+                    ClosingEvent = closingFunction;
 
-                // Save the rest of the parameters
-                Parameters = args;
+                    // Save the rest of the parameters
+                    Parameters = args;
 
-                // Create the browser
-                CustomBrowser = new HtmlWindow("package://statics/html/" + html);
+                    // Create the browser
+                    CustomBrowser = new HtmlWindow("package2://statics/html/" + html);
+                }
+                else DestroyBrowserEvent(null);
+            }
+            catch (Exception e)
+            {
+                RAGE.Ui.Console.Log(ConsoleVerbosity.Info, e.StackTrace, true);
             }
         }
 
         public static void ExecuteFunction(string function, params object[] args)
         {
-            // Call the function with the parameters
-            CustomBrowser.Call(function, args);
+            try
+            {
+                if (CustomBrowser == null)
+                    return;
+                // Call the function with the parameters
+                CustomBrowser.Call(function, args);
+            }
+            catch (Exception e)
+            {
+                RAGE.Ui.Console.Log(ConsoleVerbosity.Info, e.StackTrace, true);
+            }
+        }
+
+        public static void ExecuteJsFunction(string function)
+        {
+            try
+            {
+                if (CustomBrowser == null)
+                    return;
+                CustomBrowser.ExecuteJs(function);
+            }
+            catch (Exception e)
+            {
+                RAGE.Ui.Console.Log(ConsoleVerbosity.Info, e.StackTrace, true);
+            }
         }
 
         public static void ForceBrowserClose()
         {
-            if (ClosingEvent != null && ClosingEvent.Length > 0)
+            try
             {
-                // Call the close function
-                Events.CallLocal(ClosingEvent);
-                ClosingEvent = string.Empty;
+                if (!string.IsNullOrEmpty(ClosingEvent))
+                {
+                    // Call the close function
+                    Events.CallLocal(ClosingEvent);
+                    ClosingEvent = string.Empty;
+                }
+            }
+            catch (Exception e)
+            {
+                RAGE.Ui.Console.Log(ConsoleVerbosity.Info, e.StackTrace, true);
             }
         }
 
         public static void DestroyBrowserEvent(object[] args)
         {
-            if (!ChatManager.Opened)
+            try
             {
-                // Disable the cursor and enable the chat
-                Cursor.Visible = false;
-            }
+                if (!ChatManager.Opened)
+                {
+                    // Disable the cursor and enable the chat
+                    Cursor.Visible = false;
+                }
 
-            // Destroy the browser
-            CustomBrowser.Destroy();
-            CustomBrowser = null;
+                // Destroy the browser
+                CustomBrowser?.Destroy();
+                CustomBrowser = null;
+            }
+            catch (Exception e)
+            {
+                RAGE.Ui.Console.Log(ConsoleVerbosity.Info, e.StackTrace, true);
+            }
         }
 
         private static void OnBrowserDomReady(HtmlWindow window)
         {
-            if (CustomBrowser != null && window.Id == CustomBrowser.Id && Parameters != null)
+            try
             {
-                // Enable the cursor and disable the chat
-                Cursor.Visible = true;
+                if (CustomBrowser != null && window.Id == CustomBrowser.Id && Parameters != null)
+                {
+                    // Enable the cursor and disable the chat
+                    Cursor.Visible = true;
 
-                // Add the language to the parameters
-                List<object> parametersList = Parameters.ToList();
-                parametersList.Insert(0, CurrentLanguage);
+                    // Add the language to the parameters
+                    List<object> parametersList = Parameters.ToList();
+                    parametersList.Insert(0, CurrentLanguage);
 
-                // Remove the parameters
-                Parameters = null;
+                    // Remove the parameters
+                    Parameters = null;
 
-                // Call the function passed as parameter
-                ExecuteFunction("initializeMessages", parametersList.ToArray());
+                    // Call the function passed as parameter
+                    ExecuteFunction("initializeMessages", parametersList.ToArray());
+                }
             }
-        }        
+            catch (Exception e)
+            {
+                RAGE.Ui.Console.Log(ConsoleVerbosity.Info, e.StackTrace, true);
+                throw;
+            }
+        }
     }
 }

@@ -1,0 +1,324 @@
+/* Pot/Fiches text */
+@font-face {
+    font-family: MyriadPro-Regular;
+    src: url('../fonts/MYRIADPRO-REGULAR.OTF');
+}
+
+.text {
+    font-family: MyriadPro-Regular;
+    font-size: 2vw;
+    color: #090;
+    text-shadow: 2px 2px black;
+}
+
+.fiches-col {
+    position: absolute;
+    bottom: 30vh;
+}
+
+.fiches-text {
+    margin-right: 15vw;
+    font-size: 1.5vw;
+}
+
+.fiches-icon {
+    height: 5vh;
+}
+
+.pot-col {
+    position: absolute;
+    top: 16vh;
+}
+
+/* Waiting/Victory/Defeat messages */
+.text-waiting {
+    color: red;
+    text-shadow: 2px 2px black;
+    font-family: MyriadPro-Regular;
+    font-size: 3vw;
+    position: absolute;
+    top: 20vh;
+}
+
+.text-victory {
+    color: green;
+    text-shadow: 2px 2px black;
+    font-family: MyriadPro-Regular;
+    font-size: 2vw;
+    position: absolute;
+    top: 25vh;
+}
+
+.text-defeat {
+    color: red;
+    text-shadow: 2px 2px black;
+    font-family: MyriadPro-Regular;
+    font-size: 2vw;
+    position: absolute;
+    top: 25vh;
+}
+
+.text-nextround {
+    color: orange;
+    text-shadow: 2px 2px black;
+    font-family: MyriadPro-Regular;
+    font-size: 1.5vw;
+    position: absolute;
+    top: 30vh;
+}
+
+.star-box {
+    border-radius: 50%;
+}
+
+.star {
+    height: 5vh;
+    box-shadow: 3px 5px rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+}
+
+/* Leave game button */
+.leavebutton {
+    position: absolute;
+    top: 1%;
+    right: 3%;
+    font-size: 1vw;
+    font-family: MyriadPro-Regular;
+    border-radius: 10px;
+}
+
+.jconfirm.jconfirm-material .jconfirm-box {
+    background-color: rgba(30,30,30,0.85);
+}
+
+.jconfirm-title {
+    color: #145b94;
+}
+
+.jconfirm.jconfirm-material .jconfirm-box div.jconfirm-content {
+    color: white;
+}
+
+.jconfirm.jconfirm-material .jconfirm-box div.jconfirm-closeIcon {
+    color: white;
+}
+
+/* Game actions (call/raise/fold) */
+.actionbuttons {
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    justify-content: center;
+    font-family: MyriadPro-Regular;
+    line-height: 3vh;
+}
+
+.actionbuttons-row {
+    position: absolute;
+    bottom: 3vh;
+}
+
+.btn-xl {
+    padding: 10px 20px;
+    font-size: 2vw;
+}
+
+.btn-xl:hover {
+    color: #145b94;
+    text-shadow: 2px 2px black;
+}
+
+#btnCall {
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-bottom-left-radius: 10px;
+    -moz-border-radius-topleft: 10px;
+    -moz-border-radius-bottomleft: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+#btnFold {
+    -webkit-border-top-right-radius: 10px;
+    -webkit-border-bottom-right-radius: 10px;
+    -moz-border-radius-topright: 10px;
+    -moz-border-radius-bottomright: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#currentRaise, #currentCall {
+    font-size: 1vw;
+}
+
+.fiches-icon-actions {
+    height: 2.5vh;
+}
+
+/* Middle column (table cards, slider, game actions) */
+.full-height {
+    height: 100vh;
+}
+
+/* Slider component */
+#minRaiseSpace {
+    margin-right: 1vw;
+}
+
+#maxRaiseSpace {
+    margin-left: 1vw;
+}
+
+#minRaise {
+    color: white;
+    margin-left: 0.5vw;
+}
+
+#maxRaise {
+    color: white;
+    margin-right: 0.5vw;
+}
+
+#decreaseRaise {
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-bottom-left-radius: 10px;
+    -moz-border-radius-topleft: 10px;
+    -moz-border-radius-bottomleft: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    height: 4vh;
+}
+
+#increaseRaise {
+    -webkit-border-top-right-radius: 10px;
+    -webkit-border-bottom-right-radius: 10px;
+    -moz-border-radius-topright: 10px;
+    -moz-border-radius-bottomright: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    height: 4vh;
+}
+
+.slider-container {
+    height: 4vh;
+    width: 40vw;
+    background-color: rgba(30,30,30,0.85);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider-row {
+    position: absolute;
+    bottom: 13vh;
+}
+
+#raiseSlider .slider-selection {
+	background: green;
+}
+
+#raiseSlider {
+    width: 30vw;
+}
+
+/*.slider-handle.custom::before {
+	line-height: 20px;
+	font-size: 30px;
+	content: '$';
+	color: #00ff22;
+}*/
+
+.slider-handle.custom::before {
+    line-height: 20px;
+    font-size: 20px;
+    content: url("../img/pokerGame/fiches_icon.png");
+    color: #726204;
+  }
+
+/* Card */
+.card {
+    height: 20vh;
+    width: 8vw;
+}
+
+/* The flip card container */
+.flip-card {
+    background-color: transparent;
+    height: 20vh;
+    width: 8vw;
+    border: 1px solid #f1f1f1;
+    perspective: 1000px; /* Remove this if you don't want the 3D effect */
+  }
+  
+/* This container is needed to position the front and back side */
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+/* Do an horizontal flip when you move the mouse over the flip box container */
+/*.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}*/
+
+.flip-card-rotated {
+    transform: rotateY(180deg);
+}
+
+/* Position the front and back side */
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+}
+
+/* Style the front side (fallback if image is missing) */
+.flip-card-front {
+    background-color: #bbb;
+    color: black;
+}
+
+/* Style the back side */
+.flip-card-back {
+    background-color: dodgerblue;
+    color: white;
+    transform: rotateY(180deg);
+}
+
+/* Pocket cards */
+.pocketcards-row {
+    position: absolute;
+    bottom: 3vh;
+}
+
+.pocketcards-col {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 1vw;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Table cards */
+.tablecards-col {
+    padding-left: 0;
+    padding-right: 0.5vw;
+}
+
+.tablecards-row {
+    position: absolute;
+    top: 1vh;
+}
+
+.table-card {
+    height: 15vh;
+    width: 6vw;
+}

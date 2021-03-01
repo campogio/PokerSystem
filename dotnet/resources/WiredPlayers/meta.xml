@@ -13,7 +13,7 @@
     <!-- Database password -->
     <setting name="password" value="" />
     <!-- Database name -->
-    <setting name="database" value="svrp-base" />
+    <setting name="database" value="gtav" />
     <!-- Can take NONE or REQUIRED values -->
     <setting name="ssl" value="NONE"/>
 

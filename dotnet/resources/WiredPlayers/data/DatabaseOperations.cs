@@ -1,8 +1,11 @@
 using GTANetworkAPI;
 using MySql.Data.MySqlClient;
+using SouthValleyFive.data.persistent;
+using SouthValleyFive.poker;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 using System.Threading.Tasks;
 using WiredPlayers.Administration;
 using WiredPlayers.Buildings;
@@ -2148,6 +2151,100 @@ namespace WiredPlayers.Data
 
             // Execute the query
             DatabaseManager.GenerateCommand(connection, query, parameters).ExecuteNonQuery();
+        }
+
+        public static async Task<List<PokerTable>> GetPokerTables()
+        {
+            using MySqlConnection connection = new MySqlConnection(DatabaseManager.ConnectionString);
+            await connection.OpenAsync().ConfigureAwait(false);
+
+            string query = "SELECT * FROM `poker_tables`";
+            MySqlCommand command = DatabaseManager.GenerateCommand(connection, query, new Dictionary<string, object>());
+
+            using DbDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+
+            List<PokerTable> pokerTables = new List<PokerTable>();
+
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    PokerTable pokerTable = new PokerTable(reader.GetInt32(reader.GetOrdinal("id")),
+                        new Vector3(reader.GetFloat(reader.GetOrdinal("x")),
+                            reader.GetFloat(reader.GetOrdinal("y")), reader.GetFloat(reader.GetOrdinal("z"))),
+                        await GetPokerTableSits(reader.GetInt32(reader.GetOrdinal("id"))), (uint)reader.GetInt16(reader.GetOrdinal("dimension")));
+                    //pokerTables.Append(pokerTable);
+                    pokerTables.Add(pokerTable);
+                }
+            }
+
+            return pokerTables;
+        }
+
+        public static async Task<List<PokerTableSit>> GetPokerTableSits(int id)
+        {
+            using MySqlConnection connection = new MySqlConnection(DatabaseManager.ConnectionString);
+            await connection.OpenAsync().ConfigureAwait(false);
+
+            string query = "SELECT * FROM poker_sits WHERE pokerTable = @id`";
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+            {
+                { "@id", id },
+            };
+            MySqlCommand command = DatabaseManager.GenerateCommand(connection, query, parameters);
+
+            using DbDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+
+            List<PokerTableSit> pokerSits = new List<PokerTableSit>();
+
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    PokerTableSit pokerTable = new PokerTableSit(reader.GetInt32(reader.GetOrdinal("id")),
+                        new Vector3(reader.GetFloat(reader.GetOrdinal("posX")),
+                            reader.GetFloat(reader.GetOrdinal("posY")), reader.GetFloat(reader.GetOrdinal("posZ"))),
+                        new Vector3(reader.GetFloat(reader.GetOrdinal("rotX")),
+                            reader.GetFloat(reader.GetOrdinal("rotY")), reader.GetFloat(reader.GetOrdinal("rotZ"))));
+
+                    pokerSits.Add(pokerTable);
+                }
+            }
+
+            return pokerSits;
+        }
+
+        public static void AddPokerSits(int pokerTableID, Vector3 position, Vector3 rotation)
+        {
+            // Create the connection
+            using MySqlConnection connection = new MySqlConnection(DatabaseManager.ConnectionString);
+            connection.Open();
+
+            // Generate the command
+            string query = "INSERT INTO poker_sits(x, y, z, rotX, rotY, rotZ, pokerTable) VALUES(@x, @y, @z, @rotX, @rotY, @rotZ, @pokerTable)";
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@x", position.X }, { "@y", position.Y }, { "@z", position.Z }, { "@rotX", rotation.X }, { "@rotY", rotation.Y }, { "@rotZ", rotation.Z }, { "@pokerTable", pokerTableID } };
+
+            // Execute the query
+            MySqlCommand command = DatabaseManager.GenerateCommand(connection, query, parameters);
+            command.ExecuteNonQuery();
+            PokerTable pokerTable = Poker.PokerTables.Single(p => p.Id == pokerTableID);
+            pokerTable.Sits.Add(new PokerTableSit((int)command.LastInsertedId, position, rotation));
+        }
+
+        public static void AddPokerTable(Vector3 position, uint dimension)
+        {
+            // Create the connection
+            using MySqlConnection connection = new MySqlConnection(DatabaseManager.ConnectionString);
+            connection.Open();
+
+            // Generate the command
+            string query = "INSERT INTO poker_tables(x,y,z,dimension) VALUES(@x, @y, @z, @dimension)";
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@x", position.X }, { "@y", position.Y }, { "@z", position.Z }, { "@dimension", dimension } };
+
+            // Execute the query
+            MySqlCommand command = DatabaseManager.GenerateCommand(connection, query, parameters);
+            command.ExecuteNonQuery();
+            Poker.PokerTables.Add(new PokerTable((int)command.LastInsertedId, position, new List<PokerTableSit> { }, dimension));
         }
     }
 }

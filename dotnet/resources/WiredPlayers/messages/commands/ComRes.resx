@@ -528,4 +528,22 @@
   <data name="interior" xml:space="preserve">
     <value>interior</value>
   </data>
+  <data name="addpokersit" xml:space="preserve">
+    <value>addpokersit</value>
+  </data>
+  <data name="createpokertable" xml:space="preserve">
+    <value>createpokertable</value>
+  </data>
+  <data name="deletepokertable" xml:space="preserve">
+    <value>deletepokertable</value>
+  </data>
+  <data name="listpokertables" xml:space="preserve">
+    <value>listpokertables</value>
+  </data>
+  <data name="poker" xml:space="preserve">
+    <value>poker</value>
+  </data>
+  <data name="removepokersit" xml:space="preserve">
+    <value>removepokersit</value>
+  </data>
 </root>

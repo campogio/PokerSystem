@@ -12,10 +12,10 @@
 
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>C:\RAGEMP\server-files\dotnet\runtime\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\dotnet\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="rage-sharpN">
-      <HintPath>bin\Debug\netcoreapp3.1\rage-sharpN.dll</HintPath>
+      <HintPath>..\..\..\..\dotnet\rage-sharpN.dll</HintPath>
     </Reference>
   </ItemGroup>
 

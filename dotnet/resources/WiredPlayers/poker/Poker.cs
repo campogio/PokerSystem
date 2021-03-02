@@ -16,7 +16,7 @@ namespace SouthValleyFive.poker
             try
             {
                 PokerTables = await DatabaseOperations.GetPokerTables();
-                NAPI.Util.ConsoleOutput(string.Join(", ", PokerTables));
+                // NAPI.Util.ConsoleOutput(string.Join(", ", PokerTables));
                 foreach (PokerTable pokerTable in PokerTables)
                 {
                     NAPI.TextLabel.CreateTextLabel("/poker [Fiches]", pokerTable.Position, 2.5f, 0.5f, 4, new Color(190, 235, 100), false, pokerTable.Dimension);

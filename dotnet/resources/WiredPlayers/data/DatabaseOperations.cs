@@ -2169,11 +2169,21 @@ namespace WiredPlayers.Data
             {
                 while (reader.Read())
                 {
-                    PokerTable pokerTable = new PokerTable(reader.GetInt32(reader.GetOrdinal("id")),
-                        new Vector3(reader.GetFloat(reader.GetOrdinal("x")),
+                    int id = reader.GetInt32(reader.GetOrdinal("id"));
+                    float x= reader.GetFloat(reader.GetOrdinal("x"));
+                    float y= reader.GetFloat(reader.GetOrdinal("y"));
+                    float z= reader.GetFloat(reader.GetOrdinal("z"));
+                    int dimension = reader.GetInt16(reader.GetOrdinal("dimension"));
+                    List<PokerTableSit> pokerSits = await GetPokerTableSits(id);
+
+                    PokerTable pokerTable = new PokerTable(id,new Vector3(x,y,z),pokerSits,(uint)dimension);
+                   /* PokerTable pokerTable = new PokerTable(reader.GetInt32(reader.GetOrdinal("id")),
+                            new Vector3(reader.GetFloat(reader.GetOrdinal("x")),
                             reader.GetFloat(reader.GetOrdinal("y")), reader.GetFloat(reader.GetOrdinal("z"))),
                         await GetPokerTableSits(reader.GetInt32(reader.GetOrdinal("id"))), (uint)reader.GetInt16(reader.GetOrdinal("dimension")));
                     //pokerTables.Append(pokerTable);
+
+                    */
                     pokerTables.Add(pokerTable);
                 }
             }
@@ -2186,7 +2196,7 @@ namespace WiredPlayers.Data
             using MySqlConnection connection = new MySqlConnection(DatabaseManager.ConnectionString);
             await connection.OpenAsync().ConfigureAwait(false);
 
-            string query = "SELECT * FROM poker_sits WHERE pokerTable = @id`";
+            string query = "SELECT * FROM poker_sits WHERE pokerTable = @id";
             Dictionary<string, object> parameters = new Dictionary<string, object>
             {
                 { "@id", id },
@@ -2202,8 +2212,8 @@ namespace WiredPlayers.Data
                 while (reader.Read())
                 {
                     PokerTableSit pokerTable = new PokerTableSit(reader.GetInt32(reader.GetOrdinal("id")),
-                        new Vector3(reader.GetFloat(reader.GetOrdinal("posX")),
-                            reader.GetFloat(reader.GetOrdinal("posY")), reader.GetFloat(reader.GetOrdinal("posZ"))),
+                        new Vector3(reader.GetFloat(reader.GetOrdinal("x")),
+                            reader.GetFloat(reader.GetOrdinal("y")), reader.GetFloat(reader.GetOrdinal("z"))),
                         new Vector3(reader.GetFloat(reader.GetOrdinal("rotX")),
                             reader.GetFloat(reader.GetOrdinal("rotY")), reader.GetFloat(reader.GetOrdinal("rotZ"))));
 

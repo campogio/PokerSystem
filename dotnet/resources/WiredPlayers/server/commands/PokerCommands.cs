@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using GTANetworkAPI;
 using SouthValleyFive.data.persistent;
@@ -19,12 +20,19 @@ namespace SouthValleyFive.Server.Commands
                 try
                 {
                     PokerTable pokerTable = Poker.PokerTables.Single(p => Vector3.Distance(p.Position, player.Position)< 1.5f);
-                    PokerTableSit freeSit = pokerTable.Sits.SingleOrDefault(s => s.Occupied == null);
-                    if (freeSit == null)
+                    List<PokerTableSit> availableSeats = new List<PokerTableSit>();
+                    foreach(PokerTableSit sit in pokerTable.Sits)
+                    {
+                        if(sit.Occupied == null)
+                        {
+                            availableSeats.Add(sit);
+                        }
+                    }
+                    if (availableSeats.Count == 0)
                     {
                         player.SendChatMessage(ErrRes.poker_table_full);
                         return;
-                    }   
+                    }
                     CharacterModel characterModel = player.GetExternalData<CharacterModel>((int)Enumerators.ExternalDataSlot.Database);
 
                     if (fiches > characterModel.Money || fiches <= 0)
@@ -32,7 +40,9 @@ namespace SouthValleyFive.Server.Commands
                         player.SendChatMessage(ErrRes.player_not_enough_money);
                         return;
                     }
-                    Poker.OnPlayerSitTable(player, pokerTable, freeSit, fiches);
+                    availableSeats.First().Occupied = player;
+                    Poker.OnPlayerSitTable(player, pokerTable, availableSeats.First(), fiches);
+                    availableSeats.Clear();
                     
                 }
                 catch (Exception e)

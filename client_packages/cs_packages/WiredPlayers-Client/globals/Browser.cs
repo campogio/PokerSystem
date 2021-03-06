@@ -33,6 +33,7 @@ namespace WiredPlayers_Client.globals
                 Parameters = args;
 
                 // Create the browser
+                Cursor.Visible = true;
                 CustomBrowser = new HtmlWindow("package://statics/html/" + html);
             }
         }

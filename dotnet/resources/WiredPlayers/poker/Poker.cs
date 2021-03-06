@@ -16,12 +16,11 @@ namespace SouthValleyFive.poker
             try
             {
                 PokerTables = await DatabaseOperations.GetPokerTables();
-                // NAPI.Util.ConsoleOutput(string.Join(", ", PokerTables));
-                foreach (PokerTable pokerTable in PokerTables)
+               /* foreach (PokerTable pokerTable in PokerTables)
                 {
                     NAPI.TextLabel.CreateTextLabel("/poker [Fiches]", pokerTable.Position, 2.5f, 0.5f, 4, new Color(190, 235, 100), false, pokerTable.Dimension);
                     NAPI.TextLabel.CreateTextLabel("Digita il comando per entrare al tavolo", new Vector3(pokerTable.Position.X, pokerTable.Position.Y, pokerTable.Position.Z - 0.1f), 4.0f, 0.5f, 4, new Color(255, 255, 255), false, pokerTable.Dimension);
-                }
+                } */
             }
             catch (Exception e)
             {

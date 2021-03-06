@@ -53,7 +53,7 @@ namespace SouthValleyFiveClient.poker
         private void JoinTable(object[] args)
         {
             //Browser.ExecuteJsFunction("JoinTable(" + fiches + ',' + pot + ',' + playerName + ',' + tableCards + ")");
-            Browser.CreateBrowser("pokerSystem.html", null, null);
+            Browser.CreateBrowser("pokerSystem.html", "destroyBrowser", null);
             Browser.ExecuteJsFunction("JoinTable(\"{\"fiches\":" + args[0] + ",\"pot\":" + args[1] + ",\"playerName\":" + args[2] + ",\"tableCards\":" + args[4] + "}\")");
         }
         //private void OnPlayerRaiseUpdated(int minRaise, int maxRaise) {

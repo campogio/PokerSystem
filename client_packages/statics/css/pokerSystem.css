@@ -3,6 +3,9 @@
     font-family: MyriadPro-Regular;
     src: url('../fonts/MYRIADPRO-REGULAR.OTF');
 }
+body{
+    background: transparent !important;
+}
 
 .text {
     font-family: MyriadPro-Regular;

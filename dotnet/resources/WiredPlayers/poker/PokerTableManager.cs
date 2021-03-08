@@ -403,7 +403,7 @@ namespace SouthValleyFive.Scripts.Poker
                     _players[i].AddToHand(_deck.Deal(false));
                 }
                 ////Browser.ExecuteJsFunction($"GiveCards('{_players[i].getHand()}');");
-               //TODO: NEED TO MAKE GETHAND player.TriggerEvent("GiveCards", "{hand: "+_players[i].getHand()+"}");
+               player.TriggerEvent("GiveCards", "{hand: "+_players[i].GetHand()+"}");
             }
         }
         //pay small/big blind amount
@@ -436,9 +436,9 @@ namespace SouthValleyFive.Scripts.Poker
             ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-3] + ");");
             ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-2] + ");");
             ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-1] + ");");
-            player.TriggerEvent("AddTableCard", "{hand: _tableHand[_tableHand.Count()-3]}");
-            player.TriggerEvent("AddTableCard", "{hand: _tableHand[_tableHand.Count()-2]}");
-            player.TriggerEvent("AddTableCard", "{hand: _tableHand[_tableHand.Count()-1]}");
+            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-3]+"}");
+            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-2]+"}");
+            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-1]+"}");
         }
         //deal the turn
         public void DealTurn(Player player)
@@ -451,7 +451,7 @@ namespace SouthValleyFive.Scripts.Poker
             }
             // CLIENTSIDE -> FRONTEND
             ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-1] + ");");
-            player.TriggerEvent("AddTableCard", "{hand: _tableHand[_tableHand.Count()-1]}");
+            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-1]+"}");
         }
         //deal the river
         public void DealRiver(Player player)
@@ -464,7 +464,7 @@ namespace SouthValleyFive.Scripts.Poker
             }
             // CLIENTSIDE -> FRONTEND
             ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-1] + ");");
-            player.TriggerEvent("AddTableCard", "{hand: _tableHand[_tableHand.Count()-1]}");
+            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-1]+"}");
         }
         //showdown code!
         public void ShowDown()

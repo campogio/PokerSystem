@@ -55,8 +55,6 @@ namespace SouthValleyFiveClient.poker
         private void JoinTable(object[] args)
         {
 
-            RAGE.Ui.Console.Log(ConsoleVerbosity.Info, args[0].ToString(), true);
-
             //Browser.ExecuteJsFunction("JoinTable(" + fiches + ',' + pot + ',' + playerName + ',' + tableCards + ")");
             Browser.CreateBrowser("pokerSystem.html", "destroyBrowser", null);
             Browser.ExecuteJsFunction("JoinTable(\"{\"fiches\":" + args[0] + ",\"pot\":" + args[1] + ",\"playerName\":" + args[2] + ",\"tableCards\":" + args[4] + "}\")");

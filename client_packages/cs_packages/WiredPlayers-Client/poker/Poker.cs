@@ -1,6 +1,7 @@
 ﻿using RAGE;
 using WiredPlayers_Client.globals;
 using System;
+using RAGE.Ui;
 
 namespace SouthValleyFiveClient.poker
 {
@@ -46,12 +47,16 @@ namespace SouthValleyFiveClient.poker
         }
         private void LeaveMatchEvent(object[] args)
         {
-            Events.CallRemote("PokerLeaveEvent");
+            Events.CallRemote("pokerLeave");
+            Events.CallLocal("destroyBrowser");
         }
 
         //private void JoinTable(int fiches, int pot, String playerName, int[] tableCards) {
         private void JoinTable(object[] args)
         {
+
+            RAGE.Ui.Console.Log(ConsoleVerbosity.Info, args[0].ToString(), true);
+
             //Browser.ExecuteJsFunction("JoinTable(" + fiches + ',' + pot + ',' + playerName + ',' + tableCards + ")");
             Browser.CreateBrowser("pokerSystem.html", "destroyBrowser", null);
             Browser.ExecuteJsFunction("JoinTable(\"{\"fiches\":" + args[0] + ",\"pot\":" + args[1] + ",\"playerName\":" + args[2] + ",\"tableCards\":" + args[4] + "}\")");

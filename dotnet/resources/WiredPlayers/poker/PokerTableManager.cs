@@ -5,7 +5,7 @@ using GTANetworkAPI;
 
 namespace SouthValleyFive.Scripts.Poker
 {
-    public class PokerTableManager 
+    public class PokerTableManager : Script
     {
         private readonly PlayerList _players = new PlayerList();
         private int _maxPlayers;
@@ -57,7 +57,7 @@ namespace SouthValleyFive.Scripts.Poker
         }
         public int BigBlind
         {
-            get{return _bigBlind.Amount;}
+            get { return _bigBlind.Amount; }
         }
         public int RoundCount
         {
@@ -70,6 +70,11 @@ namespace SouthValleyFive.Scripts.Poker
         /// </summary>
         /// <param name="players"></param>
 
+        //parameterless constructor
+        public PokerTableManager()
+        {
+
+        }
         public PokerTableManager(PlayerList players, int maxPlayers)
         {
             this._players = players;
@@ -194,32 +199,42 @@ namespace SouthValleyFive.Scripts.Poker
                     player.TriggerEvent("showPokerErrorMessage", 0);
                     return;
                 }
-                
+
                 _players.Add(new PokerPlayer(player.Name, amount, player));
                 if (_players.Count >= 2)
                 {
-                player.TriggerEvent("JoinTable", "{fiches: amount, pot: _mainPot.Amount, playerName: player.Name, tableCards: _tableHand}");
+                    player.TriggerEvent("JoinTable", "{fiches: " + amount + ", pot: " + _mainPot.Amount + ", playerName: " + player.Name + ", tableCards: " + _tableHand + "}");
                 }
-                
+
             });
         }
-        [RemoteEvent("PokerLeaveEvent")]
-        public void LeaveMatch(Player player)
+        [RemoteEvent("pokerLeave")]
+        public void PokerLeaveEvent(Player player)
         {
-            
-            if (_players.Count >= 2)
+            try
             {
-                StartNextMatch();
+                //This is an abomination.
+                poker.Poker.OnPlayerLeaveTable(player);
+                //TODO: Empty the seat the player was occupying.
+
+                if (_players.Count >= 2)
+                {
+                    StartNextMatch();
+                }
+            } catch (Exception e)
+            {
+                NAPI.Util.ConsoleOutput(e.StackTrace);
             }
-        }
+
+        } 
         [RemoteEvent("PokerCallEvent")]
         public void PlayerCall(Player player) {
             // Need to check if it's their turn.
             PokerPlayer playerPoker = _players.First(p => p.Name == player.Name);
             playerPoker.Call(_mainPot);
             // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: _mainPot.MinimumRaise, maxRaise: _mainPot.getMaximumAmountPutIn()}");
-            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: _mainPot.Amount, action: 'Call'}");
+            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: "+ _mainPot.MinimumRaise + ", maxRaise: "+ _mainPot.getMaximumAmountPutIn() + "}");
+            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: "+ _mainPot.Amount + ", action: 'Call'}");
             //Browser.ExecuteJsFunction("OnPlayerRaiseUpdated({minRaise:"+ _mainPot.MinimumRaise +", maxRaise:"+ _mainPot.getMaximumAmountPutIn() +"});");
             //Browser.ExecuteJsFunction("OnPlayerPlayed({updatedPot:"+ _mainPot.Amount +", action:'Call'});");
         }
@@ -229,8 +244,8 @@ namespace SouthValleyFive.Scripts.Poker
             PokerPlayer playerPoker = _players.First(p => p.Name == player.Name);
             playerPoker.Raise(fiches, _mainPot);
             // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: _mainPot.MinimumRaise, maxRaise: _mainPot.getMaximumAmountPutIn()}");
-            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: _mainPot.Amount, action: 'Raise'}");
+            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: "+_mainPot.MinimumRaise+", maxRaise: "+_mainPot.getMaximumAmountPutIn()+"}");
+            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: "+_mainPot.Amount+", action: 'Raise'}");
         }
         /*mp.events.add({
             "PokerRaiseEvent": fiches => {
@@ -243,8 +258,8 @@ namespace SouthValleyFive.Scripts.Poker
             pokerplayer.Fold(_mainPot);
 
             // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: _mainPot.MinimumRaise, maxRaise: _mainPot.getMaximumAmountPutIn()}");
-            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: _mainPot.Amount, action: 'Fold'}");
+            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: "+_mainPot.MinimumRaise+", maxRaise: "+_mainPot.getMaximumAmountPutIn()+"}");
+            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: "+_mainPot.Amount+", action: 'Fold'}");
         }
         
         /// <summary>
@@ -388,7 +403,7 @@ namespace SouthValleyFive.Scripts.Poker
                     _players[i].AddToHand(_deck.Deal(false));
                 }
                 ////Browser.ExecuteJsFunction($"GiveCards('{_players[i].getHand()}');");
-                player.TriggerEvent("GiveCards", "{hand: _players[i].getHand()}");
+               //TODO: NEED TO MAKE GETHAND player.TriggerEvent("GiveCards", "{hand: "+_players[i].getHand()+"}");
             }
         }
         //pay small/big blind amount

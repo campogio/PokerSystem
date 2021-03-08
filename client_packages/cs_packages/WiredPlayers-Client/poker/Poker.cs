@@ -84,7 +84,8 @@ namespace SouthValleyFiveClient.poker
             Browser.ExecuteJsFunction("ShowCards()");
         }
         private void GiveCards(object[] args) {
-            Browser.ExecuteJsFunction("GiveCards(\"{\"hand\":" + args[0] + "}\")");
+            RAGE.Ui.Console.Log(ConsoleVerbosity.Info, "giveCards(\"" + args[0] + "\")", true);
+            Browser.ExecuteJsFunction("giveCards(\'" + args[0] + "\')");
         }
         private void AddTableCard(object[] args) {
             Browser.ExecuteJsFunction("AddTableCard(\"{\"card\":" + args[0] + ",\"seed\":" + args[1] + "}\")");

@@ -17,6 +17,7 @@ namespace SouthValleyFive.Scripts.Poker
         private readonly Random _rand;
         private int _turnCount;
         public string Winnermessage;
+        private bool IsActive;
         //the blind class, containing the amount of blinds, the position of the player
         //who must pay the blinds
         private class Blind
@@ -96,6 +97,7 @@ namespace SouthValleyFive.Scripts.Poker
             _smallBlind.Position = _dealerPosition + 1;
             _bigBlind.Position = _dealerPosition + 2;
             _currentIndex = _dealerPosition;
+            this.IsActive = false;
         }
         public PokerTableManager(int maxPlayers)
         {
@@ -204,6 +206,10 @@ namespace SouthValleyFive.Scripts.Poker
                 if (_players.Count >= 2)
                 {
                     player.TriggerEvent("JoinTable", "{fiches: " + amount + ", pot: " + _mainPot.Amount + ", playerName: " + player.Name + ", tableCards: " + _tableHand + "}");
+                    if (IsActive==false)
+                    {
+                        StartNextMatch();
+                    }
                 }
 
             });
@@ -269,6 +275,7 @@ namespace SouthValleyFive.Scripts.Poker
         /// </summary>
         public void StartNextMatch()
         {
+            IsActive = true;
             _players.ResetPlayers();
             _deck = new Deck();
             if (_roundCounter == 10)
@@ -300,6 +307,29 @@ namespace SouthValleyFive.Scripts.Poker
                 pokerPlayer.playerObject.TriggerEvent("showPokerMessage", "La partita sta per cominciare...");
                 pokerPlayer.playerObject.TriggerEvent("StartNextMatch");
             }
+            PokerGame();
+        }
+
+        public void PokerGame()
+        {
+            // OPENING DEAL
+            //Pay the small and big blind
+            PaySmallBlind();
+
+            PayBigBlind();
+            
+            foreach (PokerPlayer pokerPlayer in _players)
+            {
+                //Deal pocket cards to players in game
+                DealHoleCards(pokerPlayer.playerObject);
+
+                DealFlop(pokerPlayer.playerObject);
+            }
+
+            //FIRST ROUND OF BETTING
+            //Get player starting from first after big blind, do turns
+
+
         }
 
 
@@ -401,9 +431,13 @@ namespace SouthValleyFive.Scripts.Poker
                 {
                     _players[i].AddToHand(_deck.Deal(false));
                     _players[i].AddToHand(_deck.Deal(false));
-                }
+               }
                 ////Browser.ExecuteJsFunction($"GiveCards('{_players[i].getHand()}');");
-               player.TriggerEvent("GiveCards", "{hand: "+_players[i].GetHand()+"}");
+               player.TriggerEvent("GiveCards",
+                   "{\"cards\":[[" + _players[i].GetHand().getCard(0).getRank() + ","
+                   + _players[i].GetHand().getCard(1).getRank()+ "]," +
+                   "["+ _players[i].GetHand().getCard(0).getSuit() + ","
+                   + _players[i].GetHand().getCard(1).getSuit() +"]]}");
             }
         }
         //pay small/big blind amount
@@ -554,6 +588,7 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
             }
+            IsActive = false;
         }
         //check if it is necessary to create sidepots
         private bool CreateSidePots()

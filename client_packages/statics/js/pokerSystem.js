@@ -134,7 +134,7 @@ function hidePocket() {
 // Function: show pocket cards (unhide, don't uncover)
 function unhidePocket() {
     pocketCardsRow.classList.remove('hidden');
-    pocketCardsRow.fadeIn();
+   // pocketCardsRow.fadeIn();
 }
 
 // Function: hide actions
@@ -195,42 +195,55 @@ function updatePocket(newCards) {
     // Determine cards and insert them into array
     var i;
     for (i = 0; i < 2; i++) {
-        var card;
-        switch (newCards[i][0]) {
+        var card = '';
+        switch (newCards.cards[0][i]) {
             case 11:
-                card.concat('J');
+    //            card.concat('J');
+                card+='J';
                 break;
             case 12:
-                card.concat('Q');
+    //            card.concat('Q');
+                card+='Q';
                 break;
             case 13:
-                card.concat('K');
+    //            card.concat('K');
+                card+='K';
                 break;
             case 14:
-                card.concat('A');
+    //            card.concat('A');
+                card+='A';
+                break;
             default:
-                card.concat(json.card);
+    //            card.concat(newCards.cards[i][0]);
+                card+=newCards.cards[i][0];
                 break;
         }
-        switch (newCards[i][1]) {
+        switch (newCards.cards[1][i]) {
             case 1:
-                card.concat('D');
+    //            card.concat('D');
+                card+='D';
                 break;
             case 2:
-                card.concat('C');
+    //            card.concat('C');
+                card+='C';
                 break;
             case 3:
-                card.concat('H');
+    //            card.concat('H');
+                card+='H';
                 break;
             case 4:
-                card.concat('S');
+    //            card.concat('S');
+                card+='S';
                 break;
         }
         pocketCards.push(card);
     }
     // Change their pictures
-    pocketCard1.src('.../img/pokerSystem/' + pocketCards[0]);
-    pocketCard2.src('.../img/pokerSystem/' + pocketCards[1]);
+
+    pocketCard1.src='../img/pokerGame/' + pocketCards[0]+".png";
+    pocketCard2.src='../img/pokerGame/' + pocketCards[1]+".png";
+    showCards();
+
 }
 
 // Slider

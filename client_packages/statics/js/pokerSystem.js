@@ -242,6 +242,7 @@ function updatePocket(newCards) {
 
     pocketCard1.src='../img/pokerGame/' + pocketCards[0]+".png";
     pocketCard2.src='../img/pokerGame/' + pocketCards[1]+".png";
+    $(pocketCard1).attr('src',"../img/pokerGame/" + pocketCards[0]+".png");
     showCards();
 
 }

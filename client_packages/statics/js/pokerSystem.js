@@ -25,6 +25,8 @@ var pocketCardsRow = document.getElementById("pocketCards");
 var pocketCard1 = document.getElementById("pocketCard1");
 var pocketCard2 = document.getElementById("pocketCard2");
 
+var jsonCards = null;
+
 /* ============= CLIENT UI ============= */
 // Raise Slider component
 $('#pokerSlider').slider({
@@ -273,9 +275,11 @@ function joinTable(json) {
 
 // Function: get cards (don't show yet)
 function giveCards(json) {
-    var json = JSON.parse(json);
-
-    updatePocket(json);
+    jsonCards = json
+    $( document ).ready(function() {
+        var json = JSON.parse(jsonCards);
+        updatePocket(json);
+    });
 };
 
 // Function: show pocket cards

@@ -241,8 +241,8 @@ function updatePocket(newCards) {
         pocketCards.push(card);
     }
     // Change their pictures
-    pocketCard1.getElementsByTagName('img')[0].src='../img/pokerGame/' + pocketCards[0]+".png";
-    pocketCard2.getElementsByTagName('img')[0].src='../img/pokerGame/' + pocketCards[1]+".png";
+    pocketCard1.getElementsByTagName('img')[1].src='../img/pokerGame/' + pocketCards[0]+".png";
+    pocketCard2.getElementsByTagName('img')[1].src='../img/pokerGame/' + pocketCards[1]+".png";
     showCards();
 
 }

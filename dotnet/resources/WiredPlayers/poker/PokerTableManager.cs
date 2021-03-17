@@ -313,7 +313,7 @@ namespace SouthValleyFive.Scripts.Poker
         public void PokerGame()
         {
             // OPENING DEAL
-            //Pay the small and big blind
+            //Pay the small and big blind, bringing currentidex to Big Blind
             PaySmallBlind();
 
             PayBigBlind();
@@ -323,11 +323,20 @@ namespace SouthValleyFive.Scripts.Poker
                 //Deal pocket cards to players in game
                 DealHoleCards(pokerPlayer.playerObject);
 
-                DealFlop(pokerPlayer.playerObject);
+
             }
+
 
             //FIRST ROUND OF BETTING
             //Get player starting from first after big blind, do turns
+            foreach (PokerPlayer pokerPlayer in _players)
+            {
+                //unknown if this waits for players to play
+                IncrementIndex(_currentIndex);
+
+
+            }
+
 
 
         }
@@ -385,9 +394,9 @@ namespace SouthValleyFive.Scripts.Poker
         /// <returns></returns>
         public int IncrementIndex(int currentIndex)
         {
-            currentIndex++;
+            currentIndex=(currentIndex+1)%_players.Count;
             while (_players.GetPlayer(ref currentIndex).IsFolded()||_players.GetPlayer(ref currentIndex).isbusted||_players.GetPlayer(ref currentIndex).ChipStack==0)
-                currentIndex++;
+                currentIndex = (currentIndex + 1) % _players.Count;
             Player player = _players.GetPlayer(ref currentIndex).playerObject;
             // CLIENTSIDE -> FRONTEND
             int callValue = _players.GetPlayer(ref currentIndex).GetAmountToCall(_mainPot);

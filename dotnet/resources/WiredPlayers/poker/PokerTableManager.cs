@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GTANetworkAPI;
 
 namespace SouthValleyFive.Scripts.Poker
@@ -46,6 +47,8 @@ namespace SouthValleyFive.Scripts.Poker
         private int _dealerPosition;
         //the index of the current player who turn it is
         private int _currentIndex;
+        private bool playing;
+
         //various propeties
         public int TurnCount
         {
@@ -205,7 +208,10 @@ namespace SouthValleyFive.Scripts.Poker
                 _players.Add(new PokerPlayer(player.Name, amount, player));
                 if (_players.Count >= 2)
                 {
-                    player.TriggerEvent("JoinTable", "{fiches: " + amount + ", pot: " + _mainPot.Amount + ", playerName: " + player.Name + ", tableCards: " + _tableHand + "}");
+
+                    string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
+                    NAPI.Util.ConsoleOutput(json);
+                    player.TriggerEvent("JoinTable", json);
                     if (IsActive==false)
                     {
                         StartNextMatch();
@@ -260,8 +266,11 @@ namespace SouthValleyFive.Scripts.Poker
         })*/
         [RemoteEvent("PokerFoldEvent")]
         public void PlayerFold(Player player, PokerPlayer pokerplayer) {
+
             // Need to check if it's their turn.
             pokerplayer.Fold(_mainPot);
+
+            //Set bool playing to false
 
             // CLIENTSIDE -> FRONTEND INTERFACE
             player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: "+_mainPot.MinimumRaise+", maxRaise: "+_mainPot.getMaximumAmountPutIn()+"}");
@@ -312,33 +321,74 @@ namespace SouthValleyFive.Scripts.Poker
 
         public void PokerGame()
         {
-            // OPENING DEAL
-            //Pay the small and big blind, bringing currentidex to Big Blind
-            PaySmallBlind();
-
-            PayBigBlind();
-            
-            foreach (PokerPlayer pokerPlayer in _players)
+            try
             {
-                //Deal pocket cards to players in game
-                DealHoleCards(pokerPlayer.playerObject);
+                // OPENING DEAL
+                //Pay the small and big blind, bringing currentidex to Big Blind
+
+                foreach (PokerPlayer pokerPlayer in _players)
+                {
+
+                    pokerPlayer.playerObject.SendChatMessage(_players[_currentIndex + 1].playerObject.Name + " Ha pagato " + _smallBlind.Amount + " di piccolo Buio");
+
+                    pokerPlayer.playerObject.SendChatMessage(_players[_currentIndex + 2].playerObject.Name + " Ha pagato " + _bigBlind.Amount + " di grande Buio");
+
+                }
+
+                PaySmallBlind();
+
+                PayBigBlind();
+
+                foreach (PokerPlayer pokerPlayer in _players)
+                {
+                    //Deal pocket cards to players in game
+                    DealHoleCards(pokerPlayer.playerObject);
+
+                    pokerPlayer.playerObject.TriggerEvent("UpdatePot", _mainPot.Amount);
+
+
+
+                }
+
+
+                //FIRST ROUND OF BETTING
+                //Get player starting from first after big blind, do turns
+                foreach (PokerPlayer pokerPlayer in _players)
+                {
+                    NAPI.Util.ConsoleOutput("CurrentIndex start turn = " + _currentIndex);
+                    //unknown if this waits for players to play
+                    IncrementIndex(_currentIndex);
+
+                    //TODO: ADD TIMEOUT TIMER
+
+                    //Set bool to wait to play true
+                    playing = true;
+                    DateTime playstart = DateTime.Now;
+                    /*while (playing) //TODO: ADD BOOL
+                    {
+
+                        //Wait for player play
+                        if (playstart.AddSeconds(30).CompareTo(DateTime.Now)<0)
+                        {
+
+                            //TODO: insert shot wait here, 200-300msec
+                            pokerPlayer.playerObject.SendChatMessage("Timed out.");
+                            playing = false;
+                        } 
+                    }*/
+
+                    NAPI.Util.ConsoleOutput("CurrentIndex end turn= " + _currentIndex);
+
+                }
+
 
 
             }
-
-
-            //FIRST ROUND OF BETTING
-            //Get player starting from first after big blind, do turns
-            foreach (PokerPlayer pokerPlayer in _players)
+            catch (Exception e)
             {
-                //unknown if this waits for players to play
-                IncrementIndex(_currentIndex);
-
-
+                NAPI.Util.ConsoleOutput(e.StackTrace);
             }
-
-
-
+           
         }
 
 
@@ -394,9 +444,9 @@ namespace SouthValleyFive.Scripts.Poker
         /// <returns></returns>
         public int IncrementIndex(int currentIndex)
         {
-            currentIndex=(currentIndex+1)%_players.Count;
+            currentIndex++;
             while (_players.GetPlayer(ref currentIndex).IsFolded()||_players.GetPlayer(ref currentIndex).isbusted||_players.GetPlayer(ref currentIndex).ChipStack==0)
-                currentIndex = (currentIndex + 1) % _players.Count;
+                currentIndex++;
             Player player = _players.GetPlayer(ref currentIndex).playerObject;
             // CLIENTSIDE -> FRONTEND
             int callValue = _players.GetPlayer(ref currentIndex).GetAmountToCall(_mainPot);
@@ -404,6 +454,7 @@ namespace SouthValleyFive.Scripts.Poker
             ////Browser.ExecuteJsFunction($"ShowCards()");
             player.TriggerEvent("OnPlayerTurn", callValue);
             player.TriggerEvent("ShowCards");
+            NAPI.Util.ConsoleOutput("SHOWCARDS  = " + player.Name);
             return currentIndex;
         }
         //increment index, not skipping players with a chipstack of zero

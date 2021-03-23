@@ -28,6 +28,14 @@ namespace SouthValleyFiveClient.poker
             Events.Add("GiveCards",GiveCards);
             Events.Add("AddTableCard",AddTableCard);
             Events.Add("OnMatchCompleted",OnMatchCompleted);
+            //added
+            Events.Add("UpdatePot", UpdatePot);
+        }
+
+        private void UpdatePot(object[] args)
+        {
+            //RAGE.Ui.Console.Log(ConsoleVerbosity.Info, args[0].ToString(), true);
+            Browser.ExecuteJsFunction("updatePot(" + args[0].ToString() + ")") ;
         }
 
         private void JoinMatchEvent(object[] args)
@@ -57,14 +65,16 @@ namespace SouthValleyFiveClient.poker
 
             //Browser.ExecuteJsFunction("JoinTable(" + fiches + ',' + pot + ',' + playerName + ',' + tableCards + ")");
             Browser.CreateBrowser("pokerSystem.html", "destroyBrowser", null);
-            Browser.ExecuteJsFunction("JoinTable(\"{\"fiches\":" + args[0] + ",\"pot\":" + args[1] + ",\"playerName\":" + args[2] + ",\"tableCards\":" + args[4] + "}\")");
+              RAGE.Ui.Console.Log(ConsoleVerbosity.Info, "JoinTable(" + args[0] + ") ", true);
+            Browser.ExecuteJsFunction("JoinTable("+args[0]+")");
         }
         //private void OnPlayerRaiseUpdated(int minRaise, int maxRaise) {
         private void OnPlayerRaiseUpdated(object[] args) {
             Browser.ExecuteJsFunction("OnPlayerRaiseUpdated(\"{\"minRaise\":" + args[0] + ",\"maxRaise\":" + args[1] + "}\")");
         }
         private void OnPlayerPlayed(object[] args) {
-            Browser.ExecuteJsFunction("OnPlayerPlayed(\"{\"updatedPot\":" + args[0] + ",\"action\": + " + args[1] + "}\")");
+            //Browser.ExecuteJsFunction("OnPlayerPlayed(\"{\"updatedPot\":" + args[0] + ",\"action\": + " + args[1] + "}\")");
+            Browser.ExecuteJsFunction("OnPlayerPlayed("+args[0]+")");
         }
         private void ShowPokerMessage(object[] args) {
             //Browser.ExecuteJsFunction("showPokerMessage(" + arg + ")");
@@ -81,10 +91,10 @@ namespace SouthValleyFiveClient.poker
             Browser.ExecuteJsFunction("OnPlayerTurn(\"{\"call\":" + args[0] + "}\")");
         }
         private void ShowCards(object[] args) {
+          //  RAGE.Ui.Console.Log(ConsoleVerbosity.Info, "ShowCards", true);
             Browser.ExecuteJsFunction("ShowCards()");
         }
         private void GiveCards(object[] args) {
-            RAGE.Ui.Console.Log(ConsoleVerbosity.Info, "giveCards(\"" + args[0] + "\")", true);
             Browser.ExecuteJsFunction("giveCards(\'" + args[0] + "\')");
         }
         private void AddTableCard(object[] args) {

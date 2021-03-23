@@ -251,23 +251,35 @@ function updatePocket(newCards) {
 /* ============= CALLS ============= */ 
 /* Functions to manage server calls (read 'Server -> Frontend calls') */
 // Function: initialize fiches; show cards & pot if game is already on; save player name
-function joinTable(json) {
-    var json = JSON.parse(json);
+function JoinTable(json) {
+
+    console.log(json);
+
+    var variable = JSON.parse(json);
+
+    console.log(variable.playerName);
+    console.log(variable.fiches);
+    console.log(variable.pot);
+    console.log(variable.tableCards);
+
+
+
+
 
     // Hide pocket cards
     hidePocket();
     // Hide actions
     hideActions();
     // Save player name
-    playerName = json.playerName;
+    playerName = variable.playerName;
     // Update fiches
-    updateFiches(json.fiches);
+    updateFiches(variable.fiches);
     // Update pot
-    updatePot(json.pot);
+    updatePot(variable.pot);
     // Show table cards
-    tableCards = json.tableCards;
+    tableCards = variable.tableCards;
     // Check if they joined mid-game and are waiting for their turn (show message in that case)
-    if (json.pot == 0) document.getElementById('textWait').classList.remove('hidden');
+    if (variable.pot == 0) document.getElementById('textWait').classList.remove('hidden');
 };
 
 // Function: get cards (don't show yet)
@@ -280,7 +292,7 @@ function giveCards(json) {
 };
 
 // Function: show pocket cards
-function showCards() {
+function ShowCards() {
     pocketCardsCovered = false;
     pocketCard1.classList.add('flip-card-rotated');
     pocketCard2.classList.add('flip-card-rotated');
@@ -446,7 +458,7 @@ function matchCompleted(json) {
 /* Server -> Frontend calls */
 // Call: player joins table
 mp.events.add('JoinTable', (json) => {
-    joinTable(json);
+    JoinTable(json);
 });
 
 // Call: player gets pocket cards
@@ -456,7 +468,7 @@ mp.events.add('GiveCards', (json) => {
 
 // Call: player's pocket cards are shown to them
 mp.events.add('ShowCards', () => {
-    showCards();
+    ShowCards();
 });
 
 // Call: card is added to the table

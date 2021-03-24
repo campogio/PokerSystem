@@ -253,14 +253,12 @@ function updatePocket(newCards) {
 // Function: initialize fiches; show cards & pot if game is already on; save player name
 function JoinTable(json) {
 
-    console.log(json);
 
-    var variable = JSON.parse(json);
 
-    console.log(variable.playerName);
-    console.log(variable.fiches);
-    console.log(variable.pot);
-    console.log(variable.tableCards);
+    console.log(json.playerName);
+    console.log(json.fiches);
+    console.log(json.pot);
+    console.log(json.tableCards);
 
 
 
@@ -271,15 +269,15 @@ function JoinTable(json) {
     // Hide actions
     hideActions();
     // Save player name
-    playerName = variable.playerName;
+    playerName = json.playerName;
     // Update fiches
-    updateFiches(variable.fiches);
+    updateFiches(json.fiches);
     // Update pot
-    updatePot(variable.pot);
+    updatePot(json.pot);
     // Show table cards
-    tableCards = variable.tableCards;
+    tableCards = json.tableCards;
     // Check if they joined mid-game and are waiting for their turn (show message in that case)
-    if (variable.pot == 0) document.getElementById('textWait').classList.remove('hidden');
+    if (json.pot == 0) document.getElementById('textWait').classList.remove('hidden');
 };
 
 // Function: get cards (don't show yet)

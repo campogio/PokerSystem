@@ -25,7 +25,8 @@ namespace SouthValleyFive.data.persistent
             Sits = sits;
             Dimension = dimension;
             int maxPlayers = sits == null ? 0 : sits.Count;
-            TableManager = new PokerTableManager(maxPlayers);
+            TableManager = new PokerTableManager(maxPlayers,id);
+            PokerTableManager.pokerTables.Add(TableManager);
             CommandLabel = NAPI.TextLabel.CreateTextLabel("/poker [Fiches]", position, 2.5f, 0.5f, 4, new Color(190, 235, 100), false, dimension);
             HelpLabel = NAPI.TextLabel.CreateTextLabel("Digita il comando per entrare al tavolo", new Vector3(position.X, position.Y, position.Z - 0.1f), 4.0f, 0.5f, 4, new Color(255, 255, 255), false, dimension);
 

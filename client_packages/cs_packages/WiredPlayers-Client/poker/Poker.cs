@@ -98,7 +98,7 @@ namespace SouthValleyFiveClient.poker
             Browser.ExecuteJsFunction("giveCards(\'" + args[0] + "\')");
         }
         private void AddTableCard(object[] args) {
-            Browser.ExecuteJsFunction("AddTableCard(\"{\"card\":" + args[0] + ",\"seed\":" + args[1] + "}\")");
+            Browser.ExecuteJsFunction("AddTableCard("+args[0]+")");
         }
         private void OnMatchCompleted(object[] args) {
             Browser.ExecuteJsFunction("OnMatchCompleted(\"{\"winnerName\":" + args[0] + "}\")");

@@ -25,6 +25,13 @@ var pocketCardsRow = document.getElementById("pocketCards");
 var pocketCard1 = document.getElementById("pocketCard1");
 var pocketCard2 = document.getElementById("pocketCard2");
 
+var tableCard1 = document.getElementById("tablecard1");
+var tableCard2 = document.getElementById("tablecard2");
+var tableCard3 = document.getElementById("tablecard3");
+var tableCard4 = document.getElementById("tablecard4");
+var tableCard5 = document.getElementById("tablecard5");
+
+
 var jsonCards = null;
 
 /* ============= CLIENT UI ============= */
@@ -295,47 +302,65 @@ function coverCards() {
 };
 
 // Function: get new table card and show it
-function addTableCard(json) {
-    var json = JSON.parse(json);
+function AddTableCard(json) {
 
     // Determine card
     var card;
     switch (json.card) {
         case 11:
-            card.concat('J');
-            break;
-        case 12:
-            card.concat('Q');
-            break;
-        case 13:
-            card.concat('K');
-            break;
-        case 14:
-            card.concat('A');
-        default:
-            card.concat(json.card);
+    //            card.concat('J');
+                card+='J';
+                break;
+            case 12:
+    //            card.concat('Q');
+                card+='Q';
+                break;
+            case 13:
+    //            card.concat('K');
+                card+='K';
+                break;
+            case 14:
+    //            card.concat('A');
+                card+='A';
+                break;
+            default:
+                card+=json.card;
             break;
     }
     
     switch (json.seed) {
         case 1:
-            card.concat('D');
-            break;
-        case 2:
-            card.concat('C');
-            break;
-        case 3:
-            card.concat('H');
-            break;
-        case 4:
-            card.concat('S');
-            break;
+    //            card.concat('D');
+                card+='D';
+                break;
+            case 2:
+    //            card.concat('C');
+                card+='C';
+                break;
+            case 3:
+    //            card.concat('H');
+                card+='H';
+                break;
+            case 4:
+    //            card.concat('S');
+                card+='S';
+                break;
     }
+
+    $("#tableCard1-img").attr("src", "../img/pokerGame/" + card + ".png")
+    document.getElementById('tableCard1').classList.add('flip-card-rotated');
 
     tableCards.push(card);
 
+    //    pocketCard1.getElementsByTagName('img')[1].src='../img/pokerGame/' + pocketCards[0]+".png";
+
     switch(tableCards.length) {
         case 1:
+            tableCard1.getElementsByTagName('img')[0].src = "../img/pokerGame/" + card + ".png";
+            tableCard1.getElementsByTagName('img')[1].src = "../img/pokerGame/" + card + ".png";
+            tableCard1.getElementsByTagName('img')[2].src = "../img/pokerGame/" + card + ".png";
+            tableCard1.getElementsByTagName('img')[3].src = "../img/pokerGame/" + card + ".png";
+
             document.getElementById('tableCard1-img').src = "../img/pokerGame/" + card + ".png";
             document.getElementById('tableCard1').classList.add('flip-card-rotated');
             break;
@@ -361,9 +386,7 @@ function addTableCard(json) {
 };
 
 // Function: update plate along with the player's latest action (call/raise/fold)
-function playerPlayed(json) {
-    var json = JSON.parse(json);
-
+function OnPlayerPlayed(json) {
     // Update pot
     updatePot(json.updatedPot);
     // Highlight latest action
@@ -383,13 +406,11 @@ function OnPlayerTurn(json) {
     // Let player play
     playerCanPlay = true;
     // Remove waiting message if it's there
-    document.getElementById('textWait').classList.remove('hidden');
+    document.getElementById('textWait').classList.add('hidden');
 };
 
 // Function: change min and max values of Raise
-function updateRaiseLimits(json) {
-    var json = JSON.parse(json);
-    
+function OnPlayerRaiseUpdated(json) {    
     updateRaise(json);
 };
 
@@ -462,12 +483,12 @@ mp.events.add('ShowCards', () => {
 
 // Call: card is added to the table
 mp.events.add('AddTableCard', (json) => {
-    addTableCard(json);
+    AddTableCard(json);
 });
 
 // Call: update pot and player's latest action
 mp.events.add('OnPlayerPlayed', (json) => {
-    playerPlayed(json);
+    OnPlayerPlayed(json);
 });
 
 // Call: allow player to play
@@ -477,7 +498,7 @@ mp.events.add('OnPlayerTurn', (json) => {
 
 // Call: update player's minimum and maximum raise amounts
 mp.events.add('OnPlayerRaiseUpdated', (json) => {
-    updateRaiseLimits(json);
+    OnPlayerRaiseUpdated(json);
 });
 
 // Call: manage UI and reset everything upon completed match

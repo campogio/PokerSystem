@@ -9,10 +9,11 @@ namespace SouthValleyFive.Scripts.Poker
 {
     public class PokerTableManager : Script
     {
-        private readonly PlayerList _players = new PlayerList();
+        public static List<PokerTableManager> pokerTables = new List<PokerTableManager>();
+        private PlayerList _players = new PlayerList();
         private int _maxPlayers;
         private Deck _deck;
-        private readonly Hand _tableHand = new Hand();
+        private Hand _tableHand = new Hand();
         private int _roundCounter;
         private readonly Pot _mainPot;
         private readonly List<Pot> _sidePots;
@@ -21,6 +22,7 @@ namespace SouthValleyFive.Scripts.Poker
         public string Winnermessage;
         private bool IsActive;
         private CancellationTokenSource timeoutToken= new CancellationTokenSource();
+        private int id;
         //the blind class, containing the amount of blinds, the position of the player
         //who must pay the blinds
         private class Blind
@@ -81,8 +83,9 @@ namespace SouthValleyFive.Scripts.Poker
         {
 
         }
-        public PokerTableManager(PlayerList players, int maxPlayers)
+        public PokerTableManager(PlayerList players, int maxPlayers,int id)
         {
+            this.id = id;
             this._players = players;
             _maxPlayers = maxPlayers;
             _deck = new Deck();
@@ -104,8 +107,9 @@ namespace SouthValleyFive.Scripts.Poker
             _currentIndex = _dealerPosition;
             this.IsActive = false;
         }
-        public PokerTableManager(int maxPlayers)
+        public PokerTableManager(int maxPlayers,int id)
         {
+            this.id = id;
             _maxPlayers = maxPlayers;
             _players = new PlayerList();
             _deck = new Deck();
@@ -199,29 +203,45 @@ namespace SouthValleyFive.Scripts.Poker
         [RemoteEvent("JoinPokerMatch")]
         public void JoinMatch(Player player, int amount)
         {
-            NAPI.Task.Run(() =>
+            try
             {
-                if (_players.Count > _maxPlayers)
+                NAPI.Task.Run(() =>
                 {
-                    player.TriggerEvent("showPokerErrorMessage", 0);
-                    return;
-                }
-
-                _players.Add(new PokerPlayer(player.Name, amount, player));
-                if (_players.Count >= 2)
-                {
-
-                    string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
-                    NAPI.Util.ConsoleOutput(json);
-                    player.TriggerEvent("JoinTable", json);
-                    if (IsActive==false)
+                    if (_players.Count > _maxPlayers)
                     {
-                        StartNextMatch();
-                        player.TriggerEvent("StartNextMatch");
+                        player.TriggerEvent("showPokerErrorMessage", 0);
+                        return;
                     }
-                }
 
-            });
+                    _players.Add(new PokerPlayer(player.Name, amount, player));
+                    NAPI.Util.ConsoleOutput(player.Name + " JOINED TABLE, PLAYER COUNT = " + _players.Count+" ID TABLE = "+ id);
+
+                    if (_players.Count >= 2)
+                    {
+
+                        string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
+                        NAPI.Util.ConsoleOutput(json);
+                        player.TriggerEvent("JoinTable", json);
+                        if (IsActive == false)
+                        {
+                            StartNextMatch();
+                            player.TriggerEvent("StartNextMatch");
+                        }
+                    }
+                    else
+                    {
+                        string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
+                        player.TriggerEvent("JoinTable", json);
+
+                    }
+
+                });
+            }
+            catch(Exception e)
+            {
+                NAPI.Util.ConsoleOutput(e.StackTrace);
+            }
+            
         }
         [RemoteEvent("pokerLeave")]
         public void PokerLeaveEvent(Player player)
@@ -232,10 +252,10 @@ namespace SouthValleyFive.Scripts.Poker
                 poker.Poker.OnPlayerLeaveTable(player);
                 //TODO: Empty the seat the player was occupying.
 
-                if (_players.Count >= 2)
+            /*    if (_players.Count >= 2)
                 {
                     StartNextMatch();
-                }
+                }   */
             } catch (Exception e)
             {
                 NAPI.Util.ConsoleOutput(e.StackTrace);
@@ -244,23 +264,69 @@ namespace SouthValleyFive.Scripts.Poker
         } 
         [RemoteEvent("PokerCallEvent")]
         public void PlayerCall(Player player) {
-            // Need to check if it's their turn.
-            PokerPlayer playerPoker = _players.First(p => p.Name == player.Name);
-            playerPoker.Call(_mainPot);
-            // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': "+ _mainPot.MinimumRaise + ", 'maxRaise': "+ _mainPot.getMaximumAmountPutIn() + "}");
-            player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': "+ _mainPot.Amount + ", 'action': 'Call'}");
-            //Browser.ExecuteJsFunction("OnPlayerRaiseUpdated({minRaise:"+ _mainPot.MinimumRaise +", maxRaise:"+ _mainPot.getMaximumAmountPutIn() +"});");
-            //Browser.ExecuteJsFunction("OnPlayerPlayed({updatedPot:"+ _mainPot.Amount +", action:'Call'});");
+            try
+            {
+                PokerTableManager pokerTableManager=null;
+                PokerPlayer playerPoker= null;
+
+                foreach (PokerTableManager manager in pokerTables)
+                {
+                    foreach(PokerPlayer pokerPlayer in manager._players)
+                    {
+                        if(pokerPlayer.Name == player.Name){
+                            pokerTableManager = manager;
+                            playerPoker = pokerPlayer;
+                        }
+                    }
+                }
+
+                NAPI.Util.ConsoleOutput("PLAYER CALLED, PLAYERS IN POKERPLAYERS = "+pokerTableManager._players.Count + " ID TABLE = " + pokerTableManager.id);
+                // Need to check if it's their turn.
+                
+
+                playerPoker.Call(pokerTableManager._mainPot);
+                // CLIENTSIDE -> FRONTEND INTERFACE
+                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager._mainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager._mainPot.getMaximumAmountPutIn() + "}");
+                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager._mainPot.Amount + ", 'action': 'Call'}");
+                //Browser.ExecuteJsFunction("OnPlayerRaiseUpdated({minRaise:"+ _mainPot.MinimumRaise +", maxRaise:"+ _mainPot.getMaximumAmountPutIn() +"});");
+                //Browser.ExecuteJsFunction("OnPlayerPlayed({updatedPot:"+ _mainPot.Amount +", action:'Call'});");
+            }
+            catch (Exception e)
+            {
+                NAPI.Util.ConsoleOutput(e.StackTrace);
+            }
+            
         }
         [RemoteEvent("PokerRaiseEvent")]
         public void PlayerRaise(Player player, int fiches) {
-            // Need to check if it's their turn.
-            PokerPlayer playerPoker = _players.First(p => p.Name == player.Name);
-            playerPoker.Raise(fiches, _mainPot);
-            // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': "+_mainPot.MinimumRaise+", 'maxRaise': "+_mainPot.getMaximumAmountPutIn()+"}");
-            player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': "+_mainPot.Amount+", 'action': 'Raise'}");
+            try
+            {
+                // Need to check if it's their turn.
+                PokerTableManager pokerTableManager = null;
+                PokerPlayer playerPoker = null;
+
+                foreach (PokerTableManager manager in pokerTables)
+                {
+                    foreach (PokerPlayer pokerPlayer in manager._players)
+                    {
+                        if (pokerPlayer.Name == player.Name)
+                        {
+                            pokerTableManager = manager;
+                            playerPoker = pokerPlayer;
+                        }
+                    }
+                }
+
+                playerPoker.Raise(fiches, pokerTableManager._mainPot);
+                // CLIENTSIDE -> FRONTEND INTERFACE
+                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager._mainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager._mainPot.getMaximumAmountPutIn() + "}");
+                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager._mainPot.Amount + ", 'action': 'Raise'}");
+            }
+            catch (Exception e)
+            {
+                NAPI.Util.ConsoleOutput(e.StackTrace);
+            }
+            
         }
         /*mp.events.add({
             "PokerRaiseEvent": fiches => {
@@ -268,22 +334,45 @@ namespace SouthValleyFive.Scripts.Poker
             },
         })*/
         [RemoteEvent("PokerFoldEvent")]
-        public void PlayerFold(Player player, PokerPlayer pokerplayer) {
+        public void PlayerFold(Player player) {
+            try
+            {
+                // Need to check if it's their turn.
+                PokerTableManager pokerTableManager = null;
+                PokerPlayer playerPoker = null;
 
-            // Need to check if it's their turn.
-            pokerplayer.Fold(_mainPot);
+                foreach (PokerTableManager manager in pokerTables)
+                {
+                    foreach (PokerPlayer pokerPlayer in manager._players)
+                    {
+                        if (pokerPlayer.Name == player.Name)
+                        {
+                            pokerTableManager = manager;
+                            playerPoker = pokerPlayer;
+                        }
+                    }
+                }
 
-            NAPI.Util.ConsoleOutput("Player Folded.");
-            timeoutToken.Cancel();
-            timeoutToken.Dispose();
-            NAPI.Util.ConsoleOutput("Cancelled Timeout.");
+                playerPoker.Fold(pokerTableManager._mainPot);
+
+                NAPI.Util.ConsoleOutput("Player Folded.");
+                timeoutToken.Cancel();
+                timeoutToken.Dispose();
+                NAPI.Util.ConsoleOutput("Cancelled Timeout.");
 
 
-            //Set bool playing to false
+                //Set bool playing to false
 
-            // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': "+_mainPot.MinimumRaise+", 'maxRaise': "+_mainPot.getMaximumAmountPutIn()+"}");
-            player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': "+_mainPot.Amount+", 'action': 'Fold'}");
+                // CLIENTSIDE -> FRONTEND INTERFACE
+                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager._mainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager._mainPot.getMaximumAmountPutIn() + "}");
+                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager._mainPot.Amount + ", 'action': 'Fold'}");
+            }
+            catch (Exception e)
+            {
+                NAPI.Util.ConsoleOutput(e.StackTrace);
+            }
+
+            
         }
         
         /// <summary>
@@ -375,6 +464,32 @@ namespace SouthValleyFive.Scripts.Poker
 
                 }
 
+                //THE FLOP
+                //The dealer burns a card, and then deals three community cards face up.
+                //The first three cards are referred to as the flop, while all of the community cards are collectively called the board. 
+
+                //Burn a card
+                _deck.Deal();
+                //Add three cards to table
+                _tableHand.Add(_deck.Deal());
+                _tableHand.Add(_deck.Deal());
+                _tableHand.Add(_deck.Deal());
+
+                foreach (PokerPlayer pokerPlayer in _players)
+                {
+                    pokerPlayer.playerObject.SendChatMessage("Card 1: "+ _tableHand[0].getRank() + _tableHand[0].getSuit());
+                    pokerPlayer.playerObject.SendChatMessage("Card 2: " + _tableHand[1].getRank() + _tableHand[1].getSuit());
+                    pokerPlayer.playerObject.SendChatMessage("Card 3: " + _tableHand[2].getRank() + _tableHand[2].getSuit());
+
+
+
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[0].getRank() + ",'seed': '" + _tableHand[0].getSuit() + "'}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[1].getRank() + ",'seed': '" + _tableHand[1].getSuit() + "'}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[2].getRank() + ",'seed': '" + _tableHand[2].getSuit() + "'}");
+
+
+                }
+
 
 
             }
@@ -453,7 +568,6 @@ namespace SouthValleyFive.Scripts.Poker
             ////Browser.ExecuteJsFunction($"ShowCards()");
             player.TriggerEvent("OnPlayerTurn", callValue);
             player.TriggerEvent("ShowCards");
-            NAPI.Util.ConsoleOutput("SHOWCARDS  = " + player.Name);
             return currentIndex;
         }
         //increment index, not skipping players with a chipstack of zero

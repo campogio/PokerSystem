@@ -136,7 +136,7 @@ function hidePocket() {
 // Function: show pocket cards (unhide, don't uncover)
 function unhidePocket() {
     pocketCardsRow.classList.remove('hidden');
-   // pocketCardsRow.fadeIn();
+ //   pocketCardsRow.fadeIn();
 }
 
 // Function: hide actions
@@ -147,7 +147,7 @@ function hideActions() {
 // Function: show actions
 function unhideActions() {
     actions.classList.remove('hidden');
-    actions.fadeIn();
+//    actions.fadeIn();
 }
 
 // Function: disable actions
@@ -243,6 +243,8 @@ function updatePocket(newCards) {
     // Change their pictures
     pocketCard1.getElementsByTagName('img')[1].src='../img/pokerGame/' + pocketCards[0]+".png";
     pocketCard2.getElementsByTagName('img')[1].src='../img/pokerGame/' + pocketCards[1]+".png";
+
+    ShowCards();
 }
 
 // Slider
@@ -252,17 +254,6 @@ function updatePocket(newCards) {
 /* Functions to manage server calls (read 'Server -> Frontend calls') */
 // Function: initialize fiches; show cards & pot if game is already on; save player name
 function JoinTable(json) {
-
-
-
-    console.log(json.playerName);
-    console.log(json.fiches);
-    console.log(json.pot);
-    console.log(json.tableCards);
-
-
-
-
 
     // Hide pocket cards
     hidePocket();
@@ -383,11 +374,11 @@ function playerPlayed(json) {
 };
 
 // Function: allow player to play (their turn now); show action buttons
-function playerTurn(json) {
-    var json = JSON.parse(json);
+function OnPlayerTurn(json) {
     // Update call price value
     updateCall(json.call);
     // Don't highlight latest action anymore
+    unhideActions();
     enableActions();
     // Let player play
     playerCanPlay = true;
@@ -403,7 +394,7 @@ function updateRaiseLimits(json) {
 };
 
 // Function: reset winning text
-function newMatch() {
+function StartNextMatch() {
     document.getElementById('textWait').classList.add('hidden');
     document.getElementById('textVictory').classList.add('hidden');
     document.getElementById('textDefeat').classList.add('hidden');
@@ -481,7 +472,7 @@ mp.events.add('OnPlayerPlayed', (json) => {
 
 // Call: allow player to play
 mp.events.add('OnPlayerTurn', (json) => {
-    playerTurn(json);
+    OnPlayerTurn(json);
 });
 
 // Call: update player's minimum and maximum raise amounts
@@ -496,7 +487,7 @@ mp.events.add('OnMatchCompleted', (json) => {
 
 // Call: manage UI after new match
 mp.events.add('StartNextMatch', () => {
-    newMatch();
+    StartNextMatch();
 });
 
 /* Frontend -> Server functions */

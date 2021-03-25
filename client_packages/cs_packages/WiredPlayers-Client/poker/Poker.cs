@@ -70,7 +70,7 @@ namespace SouthValleyFiveClient.poker
         }
         //private void OnPlayerRaiseUpdated(int minRaise, int maxRaise) {
         private void OnPlayerRaiseUpdated(object[] args) {
-            Browser.ExecuteJsFunction("OnPlayerRaiseUpdated(\"{\"minRaise\":" + args[0] + ",\"maxRaise\":" + args[1] + "}\")");
+            Browser.ExecuteJsFunction("OnPlayerRaiseUpdated(" + args[0] + ")");
         }
         private void OnPlayerPlayed(object[] args) {
             //Browser.ExecuteJsFunction("OnPlayerPlayed(\"{\"updatedPot\":" + args[0] + ",\"action\": + " + args[1] + "}\")");
@@ -88,7 +88,7 @@ namespace SouthValleyFiveClient.poker
             Browser.ExecuteJsFunction("StartNextMatch()");
         }
         private void OnPlayerTurn(object[] args) {
-            Browser.ExecuteJsFunction("OnPlayerTurn(\"{\"call\":" + args[0] + "}\")");
+            Browser.ExecuteJsFunction("OnPlayerTurn({'call':" + args[0] + "})");
         }
         private void ShowCards(object[] args) {
           //  RAGE.Ui.Console.Log(ConsoleVerbosity.Info, "ShowCards", true);

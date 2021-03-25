@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using GTANetworkAPI;
 
@@ -19,6 +20,7 @@ namespace SouthValleyFive.Scripts.Poker
         private int _turnCount;
         public string Winnermessage;
         private bool IsActive;
+        private CancellationTokenSource timeoutToken= new CancellationTokenSource();
         //the blind class, containing the amount of blinds, the position of the player
         //who must pay the blinds
         private class Blind
@@ -215,6 +217,7 @@ namespace SouthValleyFive.Scripts.Poker
                     if (IsActive==false)
                     {
                         StartNextMatch();
+                        player.TriggerEvent("StartNextMatch");
                     }
                 }
 
@@ -245,8 +248,8 @@ namespace SouthValleyFive.Scripts.Poker
             PokerPlayer playerPoker = _players.First(p => p.Name == player.Name);
             playerPoker.Call(_mainPot);
             // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: "+ _mainPot.MinimumRaise + ", maxRaise: "+ _mainPot.getMaximumAmountPutIn() + "}");
-            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: "+ _mainPot.Amount + ", action: 'Call'}");
+            player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': "+ _mainPot.MinimumRaise + ", 'maxRaise': "+ _mainPot.getMaximumAmountPutIn() + "}");
+            player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': "+ _mainPot.Amount + ", 'action': 'Call'}");
             //Browser.ExecuteJsFunction("OnPlayerRaiseUpdated({minRaise:"+ _mainPot.MinimumRaise +", maxRaise:"+ _mainPot.getMaximumAmountPutIn() +"});");
             //Browser.ExecuteJsFunction("OnPlayerPlayed({updatedPot:"+ _mainPot.Amount +", action:'Call'});");
         }
@@ -256,8 +259,8 @@ namespace SouthValleyFive.Scripts.Poker
             PokerPlayer playerPoker = _players.First(p => p.Name == player.Name);
             playerPoker.Raise(fiches, _mainPot);
             // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: "+_mainPot.MinimumRaise+", maxRaise: "+_mainPot.getMaximumAmountPutIn()+"}");
-            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: "+_mainPot.Amount+", action: 'Raise'}");
+            player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': "+_mainPot.MinimumRaise+", 'maxRaise': "+_mainPot.getMaximumAmountPutIn()+"}");
+            player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': "+_mainPot.Amount+", 'action': 'Raise'}");
         }
         /*mp.events.add({
             "PokerRaiseEvent": fiches => {
@@ -270,11 +273,17 @@ namespace SouthValleyFive.Scripts.Poker
             // Need to check if it's their turn.
             pokerplayer.Fold(_mainPot);
 
+            NAPI.Util.ConsoleOutput("Player Folded.");
+            timeoutToken.Cancel();
+            timeoutToken.Dispose();
+            NAPI.Util.ConsoleOutput("Cancelled Timeout.");
+
+
             //Set bool playing to false
 
             // CLIENTSIDE -> FRONTEND INTERFACE
-            player.TriggerEvent("OnPlayerRaiseUpdated", "{minRaise: "+_mainPot.MinimumRaise+", maxRaise: "+_mainPot.getMaximumAmountPutIn()+"}");
-            player.TriggerEvent("OnPlayerPlayed", "{updatedPot: "+_mainPot.Amount+", action: 'Fold'}");
+            player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': "+_mainPot.MinimumRaise+", 'maxRaise': "+_mainPot.getMaximumAmountPutIn()+"}");
+            player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': "+_mainPot.Amount+", 'action': 'Fold'}");
         }
         
         /// <summary>
@@ -319,7 +328,7 @@ namespace SouthValleyFive.Scripts.Poker
             PokerGame();
         }
 
-        public void PokerGame()
+        public async Task PokerGame()
         {
             try
             {
@@ -346,8 +355,6 @@ namespace SouthValleyFive.Scripts.Poker
 
                     pokerPlayer.playerObject.TriggerEvent("UpdatePot", _mainPot.Amount);
 
-
-
                 }
 
 
@@ -355,28 +362,15 @@ namespace SouthValleyFive.Scripts.Poker
                 //Get player starting from first after big blind, do turns
                 foreach (PokerPlayer pokerPlayer in _players)
                 {
+                    Player player = pokerPlayer.playerObject;
                     NAPI.Util.ConsoleOutput("CurrentIndex start turn = " + _currentIndex);
                     //unknown if this waits for players to play
                     IncrementIndex(_currentIndex);
 
+
                     //TODO: ADD TIMEOUT TIMER
-
+                    await TimeOut(timeoutToken.Token);
                     //Set bool to wait to play true
-                    playing = true;
-                    DateTime playstart = DateTime.Now;
-                    /*while (playing) //TODO: ADD BOOL
-                    {
-
-                        //Wait for player play
-                        if (playstart.AddSeconds(30).CompareTo(DateTime.Now)<0)
-                        {
-
-                            //TODO: insert shot wait here, 200-300msec
-                            pokerPlayer.playerObject.SendChatMessage("Timed out.");
-                            playing = false;
-                        } 
-                    }*/
-
                     NAPI.Util.ConsoleOutput("CurrentIndex end turn= " + _currentIndex);
 
                 }
@@ -389,6 +383,11 @@ namespace SouthValleyFive.Scripts.Poker
                 NAPI.Util.ConsoleOutput(e.StackTrace);
             }
            
+        }
+
+        public async Task TimeOut(CancellationToken token)
+        {
+            await Task.Delay(10000, token);
         }
 
 

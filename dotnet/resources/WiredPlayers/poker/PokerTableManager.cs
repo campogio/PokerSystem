@@ -483,9 +483,9 @@ namespace SouthValleyFive.Scripts.Poker
 
 
 
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[0].getRank() + ",'seed': '" + _tableHand[0].getSuit() + "'}");
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[1].getRank() + ",'seed': '" + _tableHand[1].getSuit() + "'}");
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[2].getRank() + ",'seed': '" + _tableHand[2].getSuit() + "'}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[0].getRank() + ",'seed': " + _tableHand[0].getSuit() + "}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[1].getRank() + ",'seed': " + _tableHand[1].getSuit() + "}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[2].getRank() + ",'seed': " + _tableHand[2].getSuit() + "}");
 
 
                 }

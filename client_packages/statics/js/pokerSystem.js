@@ -273,7 +273,12 @@ function JoinTable(json) {
     // Update pot
     updatePot(json.pot);
     // Show table cards
-    tableCards = json.tableCards;
+    if(json.tableCards=="No Poker Hand is Found"){
+
+    }else{
+        tableCards = json.tableCards;
+    }
+
     // Check if they joined mid-game and are waiting for their turn (show message in that case)
     if (json.pot == 0) document.getElementById('textWait').classList.remove('hidden');
 };
@@ -304,79 +309,96 @@ function coverCards() {
 // Function: get new table card and show it
 function AddTableCard(json) {
 
+    console.log(json.card)
+    console.log(json.seed)
     // Determine card
     var card;
     switch (json.card) {
         case 11:
     //            card.concat('J');
-                card+='J';
+                card='J';
                 break;
-            case 12:
+        case 12:
     //            card.concat('Q');
-                card+='Q';
+                card='Q';
                 break;
-            case 13:
+        case 13:
     //            card.concat('K');
-                card+='K';
+                card='K';
                 break;
-            case 14:
+        case 14:
     //            card.concat('A');
-                card+='A';
+                card='A';
                 break;
-            default:
-                card+=json.card;
-            break;
+        default:
+                card=json.card;
+                break;
     }
     
     switch (json.seed) {
         case 1:
-    //            card.concat('D');
+
                 card+='D';
                 break;
-            case 2:
-    //            card.concat('C');
+        case 2:
+
                 card+='C';
                 break;
-            case 3:
-    //            card.concat('H');
+        case 3:
+
                 card+='H';
                 break;
-            case 4:
-    //            card.concat('S');
+        case 4:
+
                 card+='S';
+                break;
+        default:
                 break;
     }
 
-    $("#tableCard1-img").attr("src", "../img/pokerGame/" + card + ".png")
-    document.getElementById('tableCard1').classList.add('flip-card-rotated');
+    console.log("Card "+ card);
+    console.log("Tablecards Lenght "+tableCards.length);
 
-    tableCards.push(card);
 
-    //    pocketCard1.getElementsByTagName('img')[1].src='../img/pokerGame/' + pocketCards[0]+".png";
 
     switch(tableCards.length) {
-        case 1:
-            tableCard1.getElementsByTagName('img')[0].src = "../img/pokerGame/" + card + ".png";
-            tableCard1.getElementsByTagName('img')[1].src = "../img/pokerGame/" + card + ".png";
-            tableCard1.getElementsByTagName('img')[2].src = "../img/pokerGame/" + card + ".png";
-            tableCard1.getElementsByTagName('img')[3].src = "../img/pokerGame/" + card + ".png";
+        case 0:
+            tableCards[0]=card;
+            $("#tableCard1-img").attr("src", "../img/pokerGame/" + card + ".png")
+            document.getElementById('tableCard1').classList.add('flip-card-rotated');
 
             document.getElementById('tableCard1-img').src = "../img/pokerGame/" + card + ".png";
             document.getElementById('tableCard1').classList.add('flip-card-rotated');
             break;
-        case 2:
+        case 1:
+            tableCards[1]=card;
+            $("#tableCard2-img").attr("src", "../img/pokerGame/" + card + ".png")
+            document.getElementById('tableCard1').classList.add('flip-card-rotated');
+
             document.getElementById('tableCard2-img').src = "../img/pokerGame/" + card + ".png";
             document.getElementById('tableCard2').classList.add('flip-card-rotated');
             break;
-        case 3:
+        case 2:
+            tableCards[2]=card;
+            $("#tableCard3-img").attr("src", "../img/pokerGame/" + card + ".png")
+            document.getElementById('tableCard1').classList.add('flip-card-rotated');
+
             document.getElementById('tableCard3-img').src = "../img/pokerGame/" + card + ".png";
             document.getElementById('tableCard3').classList.add('flip-card-rotated');
             break;
-        case 4:
+        case 3:
+            tableCards[3]=card;
+            $("#tableCard4-img").attr("src", "../img/pokerGame/" + card + ".png")
+            document.getElementById('tableCard1').classList.add('flip-card-rotated');
+
             document.getElementById('tableCard4-img').src = "../img/pokerGame/" + card + ".png";
             document.getElementById('tableCard4').classList.add('flip-card-rotated');
             break;
-        case 5:
+        case 4:
+            tableCards[4]=card;
+            $("#tableCard5-img").attr("src", "../img/pokerGame/" + card + ".png")
+            document.getElementById('tableCard1').classList.add('flip-card-rotated');
+
             document.getElementById('tableCard5-img').src = "../img/pokerGame/" + card + ".png";
             document.getElementById('tableCard5').classList.add('flip-card-rotated');
             break;

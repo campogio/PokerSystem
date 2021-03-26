@@ -215,12 +215,11 @@ namespace SouthValleyFive.Scripts.Poker
 
                     _players.Add(new PokerPlayer(player.Name, amount, player));
                     NAPI.Util.ConsoleOutput(player.Name + " JOINED TABLE, PLAYER COUNT = " + _players.Count+" ID TABLE = "+ id);
+                    string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
 
                     if (_players.Count >= 2)
                     {
 
-                        string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
-                        NAPI.Util.ConsoleOutput(json);
                         player.TriggerEvent("JoinTable", json);
                         if (IsActive == false)
                         {
@@ -230,7 +229,6 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                     else
                     {
-                        string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
                         player.TriggerEvent("JoinTable", json);
 
                     }
@@ -437,10 +435,29 @@ namespace SouthValleyFive.Scripts.Poker
 
                 PayBigBlind();
 
+                _deck.Shuffle();
+
                 foreach (PokerPlayer pokerPlayer in _players)
                 {
                     //Deal pocket cards to players in game
-                    DealHoleCards(pokerPlayer.playerObject);
+                    Card card1 = _deck.Deal();
+                    Card card2 = _deck.Deal();
+
+                    pokerPlayer.AddToHand(card1);
+                    pokerPlayer.AddToHand(card2);
+
+                    pokerPlayer.playerObject.TriggerEvent("GiveCards",
+                   "{\"cards\":[[" + card1.getRank() + ","
+                   + card2.getRank() + "]," +
+                   "[" + card1.getSuit() + ","
+                   + card2.getSuit() + "]]}");
+
+                    NAPI.Util.ConsoleOutput("POCKETCARD 1(RANK,SUIT) =" + card1.getRank()+" "+card1.getSuit());
+                    NAPI.Util.ConsoleOutput("POCKETCARD 2(RANK,SUIT) =" + card2.getRank()+" "+card2.getSuit());
+
+
+
+                    //DealHoleCards(pokerPlayer.playerObject);
 
                     pokerPlayer.playerObject.TriggerEvent("UpdatePot", _mainPot.Amount);
 
@@ -453,11 +470,10 @@ namespace SouthValleyFive.Scripts.Poker
                 {
                     Player player = pokerPlayer.playerObject;
                     NAPI.Util.ConsoleOutput("CurrentIndex start turn = " + _currentIndex);
-                    //unknown if this waits for players to play
                     IncrementIndex(_currentIndex);
 
 
-                    //TODO: ADD TIMEOUT TIMER
+                    //TIMEOUT TIMER
                     await TimeOut(timeoutToken.Token);
                     //Set bool to wait to play true
                     NAPI.Util.ConsoleOutput("CurrentIndex end turn= " + _currentIndex);
@@ -477,19 +493,80 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerPlayer pokerPlayer in _players)
                 {
-                    pokerPlayer.playerObject.SendChatMessage("Card 1: "+ _tableHand[0].getRank() + _tableHand[0].getSuit());
-                    pokerPlayer.playerObject.SendChatMessage("Card 2: " + _tableHand[1].getRank() + _tableHand[1].getSuit());
-                    pokerPlayer.playerObject.SendChatMessage("Card 3: " + _tableHand[2].getRank() + _tableHand[2].getSuit());
+                    //    pokerPlayer.playerObject.SendChatMessage("Card 1: "+ _tableHand[0].getRank() + _tableHand[0].getSuit());
+                    //    pokerPlayer.playerObject.SendChatMessage("Card 2: " + _tableHand[1].getRank() + _tableHand[1].getSuit());
+                    //    pokerPlayer.playerObject.SendChatMessage("Card 3: " + _tableHand[2].getRank() + _tableHand[2].getSuit());
 
-
+                    pokerPlayer.AddToHand(_tableHand);
 
                     pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[0].getRank() + ",'seed': " + _tableHand[0].getSuit() + "}");
                     pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[1].getRank() + ",'seed': " + _tableHand[1].getSuit() + "}");
                     pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[2].getRank() + ",'seed': " + _tableHand[2].getSuit() + "}");
 
+                }
+
+                //SECOND ROUND OF BETTING
+                //
+
+                //THE TURN
+                //The dealer burns another card, and then adds a fourth card face-up to the community cards.
+                //This fourth card is known as the turn card, or fourth street.
+
+                _deck.Deal();
+                Card turn = _deck.Deal();
+
+                _tableHand.Add(turn);
+
+                foreach(PokerPlayer pokerPlayer in _players){
+
+                    pokerPlayer.AddToHand(turn);
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[3].getRank() + ",'seed': " + _tableHand[3].getSuit() + "}");
 
                 }
 
+                //THIRD ROUND OF BETTING
+                //
+
+                //THE RIVER
+                //The dealer burns another card, and then adds a fifth and final card to the community cards. 
+                //This fifth card is known as the river card, or fifth street. 
+
+                _deck.Deal();
+                Card river = _deck.Deal();
+                _tableHand.Add(river);
+
+                foreach (PokerPlayer pokerPlayer in _players)
+                {
+                    pokerPlayer.AddToHand(river);
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[4].getRank() + ",'seed': " + _tableHand[4].getSuit() + "}");
+
+                    NAPI.Util.ConsoleOutput("Player "+ pokerPlayer.Name);
+                    NAPI.Util.ConsoleOutput("PocketCard 1=" + pokerPlayer.GetHand()[0]);
+                    NAPI.Util.ConsoleOutput("PocketCard 2=" + pokerPlayer.GetHand()[1]);
+                    NAPI.Util.ConsoleOutput("Tablecard 1 =" + pokerPlayer.GetHand()[2]);
+                    NAPI.Util.ConsoleOutput("Tablecard 2 =" + pokerPlayer.GetHand()[3]);
+                    NAPI.Util.ConsoleOutput("Tablecard 3 =" + pokerPlayer.GetHand()[4]);
+                    NAPI.Util.ConsoleOutput("Tablecard 4 =" + pokerPlayer.GetHand()[5]);
+                    NAPI.Util.ConsoleOutput("Tablecard 5 =" + pokerPlayer.GetHand()[6]);
+
+                    Hand besthand = HandCombination.getBestHandEfficiently(pokerPlayer.GetHand());
+                    NAPI.Util.ConsoleOutput("Result besthand=" + besthand);
+                    pokerPlayer.SetHand(besthand);
+
+                    NAPI.Util.ConsoleOutput("Result =" + pokerPlayer.GetHand());
+
+
+
+
+                }
+
+                //FINAL ROUND OF BETTING
+                //
+
+
+
+                //SHOWDOWN
+                ShowDown();
 
 
             }
@@ -672,6 +749,7 @@ namespace SouthValleyFive.Scripts.Poker
             // CLIENTSIDE -> FRONTEND
             ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-1] + ");");
             player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-1]+"}");
+
         }
         //showdown code!
         public void ShowDown()
@@ -735,6 +813,14 @@ namespace SouthValleyFive.Scripts.Poker
             // CLIENTSIDE - FRONTEND; ON MATCH COMPLETED
             for (int i = 0; i < this.GetPlayers().Count; i++)
             {
+                if (winners.Contains(i))
+                {
+                    _players[i].playerObject.SendChatMessage("Winner= " + _players[i].Name);
+                }
+                else
+                {
+                    _players[i].playerObject.SendChatMessage("Loser= " + _players[i].Name);
+                }
                 _players[i].playerObject.TriggerEvent("OnMatchCompleted", Winnermessage);
             }
             //awarding sidepots

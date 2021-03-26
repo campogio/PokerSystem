@@ -12,6 +12,7 @@ public static class HandCombination
 {
     public static Hand getBestHand(Hand hand)
     {
+        hand.getValue().Clear();
         if (hand.Count() < 5)
         {
             hand.Clear();

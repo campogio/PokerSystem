@@ -27,10 +27,10 @@ namespace SouthValleyFive.data.persistent
             int maxPlayers = sits == null ? 0 : sits.Count;
             TableManager = new PokerTableManager(maxPlayers,id);
             PokerTableManager.pokerTables.Add(TableManager);
-            CommandLabel = NAPI.TextLabel.CreateTextLabel("/poker [Fiches]", position, 2.5f, 0.5f, 4, new Color(190, 235, 100), false, dimension);
-            HelpLabel = NAPI.TextLabel.CreateTextLabel("Digita il comando per entrare al tavolo", new Vector3(position.X, position.Y, position.Z - 0.1f), 4.0f, 0.5f, 4, new Color(255, 255, 255), false, dimension);
+            CommandLabel = NAPI.TextLabel.CreateTextLabel("/poker [Fiches]", position, 5.0f, 0.5f, 4, new Color(190, 235, 100), false, dimension);
+            HelpLabel = NAPI.TextLabel.CreateTextLabel("Digita il comando per entrare al tavolo", new Vector3(position.X, position.Y, position.Z - 0.1f), 5.0f, 0.5f, 4, new Color(255, 255, 255), false, dimension);
 
-            Model = NAPI.Object.CreateObject(2796928242, new Vector3(position.X,position.Y,position.Z-0.5f),new Vector3(0,0,0),255,dimension);
+            Model = NAPI.Object.CreateObject(702477265, new Vector3(position.X,position.Y,position.Z-0.65f),new Vector3(0,0,0),255,dimension);
 
         }
     }

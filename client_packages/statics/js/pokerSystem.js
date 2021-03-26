@@ -100,16 +100,16 @@ function updateRaise(newRaise) {
 
     // Calculate new ticks
     // Avg between min and max, avg between min and new avg, avg between max and new avg
-    var avg = (minRaise+maxRaise)/2;
+    //var avg = (minRaise+maxRaise)/2;
 
-    var ticks = [];
-    ticks.push(minRaise,((minRaise+avg)/2),avg,((maxRaise+avg)/2),maxRaise);
+    //var ticks = [];
+    //ticks.push(minRaise,((minRaise+avg)/2),avg,((maxRaise+avg)/2),maxRaise);
 
-    var ticks_labels = [];
-    var i;
-    for (i = 0; i < ticks.length; i++) {
-        ticks_labels.push(ticks[i]);
-    }
+    //var ticks_labels = [];
+    //var i;
+    //for (i = 0; i < ticks.length; i++) {
+    //    ticks_labels.push(ticks[i]);
+    //}
 
     // New interval (step)
     var step = maxRaise/10;
@@ -118,8 +118,8 @@ function updateRaise(newRaise) {
     $("#pokerSlider").slider('setAttribute', 'min', minRaise);
     $("#pokerSlider").slider('setAttribute', 'max', maxRaise);
     $("#pokerSlider").slider('setAttribute', 'step', step);
-    $("#pokerSlider").slider('setAttribute', 'ticks', ticks);
-    $("#pokerSlider").slider('setAttribute', 'ticks_labels', ticks_labels);
+    //$("#pokerSlider").slider('setAttribute', 'ticks', ticks);
+    //$("#pokerSlider").slider('setAttribute', 'ticks_labels', ticks_labels);
     // Reset value
     $("#pokerSlider").slider('setValue', avg);
     // Refresh slider
@@ -224,7 +224,7 @@ function updatePocket(newCards) {
                 break;
             default:
     //            card.concat(newCards.cards[i][0]);
-                card+=newCards.cards[i][0];
+                card+=newCards.cards[0][i];
                 break;
         }
         switch (newCards.cards[1][i]) {

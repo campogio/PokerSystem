@@ -127,6 +127,10 @@ public class Pot
         if (amount < 0)
             return;
         amountInPot += amount;
+        if (amount > maximumAmountPutIn)
+        {
+            maximumAmountPutIn = amount;
+        }
     }
     //get maximum amount in pot
     public int getMaximumAmountPutIn()

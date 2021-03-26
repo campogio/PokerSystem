@@ -19,7 +19,7 @@ namespace SouthValleyFive.Server.Commands
             {
                 try
                 {
-                    PokerTable pokerTable = Poker.PokerTables.Single(p => Vector3.Distance(p.Position, player.Position)< 1.5f);
+                    PokerTable pokerTable = Poker.PokerTables.Single(p => Vector3.Distance(p.Position, player.Position)< 3f);
                     List<PokerTableSit> availableSeats = new List<PokerTableSit>();
                     foreach(PokerTableSit sit in pokerTable.Sits)
                     {

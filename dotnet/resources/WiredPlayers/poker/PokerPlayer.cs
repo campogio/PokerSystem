@@ -137,6 +137,23 @@ public class PokerPlayer : INotifyPropertyChanged
     {
         return MyHand;
     }
+
+    public void SetHand(Hand hand)
+    {
+        this.MyHand.Clear();
+        this.MyHand.getValue().Clear();
+
+        for(int i =0; i<hand.Count();i++)
+        {
+            this.MyHand.Add(hand[i]);
+        }
+        foreach(int k in hand.getValue())
+        {
+            this.MyHand.setValue(k);
+        }
+
+
+    }
     //add hands to hand
     public void AddToHand(Hand hand)
     {

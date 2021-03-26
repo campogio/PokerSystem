@@ -1954,7 +1954,7 @@ namespace WiredPlayers.Server.Commands
                     player.SendChatMessage("[TAVOLI DA POKER]");
                     foreach (PokerTable pokerTable in Poker.PokerTables)
                     {
-                        player.SendChatMessage("[Tavolo(" + pokerTable.Id + ")");
+                        player.SendChatMessage("[Tavolo](" + pokerTable.Id + ")");
                         if (pokerTable.Sits.Count == 0)
                         {
                             player.SendChatMessage("Nessuna seduta associata");
@@ -1962,7 +1962,7 @@ namespace WiredPlayers.Server.Commands
                         }
                         foreach (PokerTableSit sit in pokerTable.Sits)
                         {
-                            player.SendChatMessage("[Tavolo(" + sit.Id + ")");
+                            player.SendChatMessage("[Sedia](" + sit.Id + ")");
                         }
                     }
                 }

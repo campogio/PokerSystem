@@ -21,7 +21,8 @@ namespace SouthValleyFive.Scripts.Poker
         private int _turnCount;
         public string Winnermessage;
         private bool IsActive;
-        private CancellationTokenSource timeoutToken= new CancellationTokenSource();
+        private CancellationTokenSource source= new CancellationTokenSource();
+        private CancellationToken token;
         private int id;
         //the blind class, containing the amount of blinds, the position of the player
         //who must pay the blinds
@@ -85,6 +86,7 @@ namespace SouthValleyFive.Scripts.Poker
         }
         public PokerTableManager(PlayerList players, int maxPlayers,int id)
         {
+            token = source.Token;
             this.id = id;
             this._players = players;
             _maxPlayers = maxPlayers;
@@ -246,6 +248,20 @@ namespace SouthValleyFive.Scripts.Poker
         {
             try
             {
+                PokerTableManager pokerTableManager = null;
+                PokerPlayer playerPoker = null;
+
+                foreach (PokerTableManager manager in pokerTables)
+                {
+                    foreach (PokerPlayer pokerPlayer in manager._players)
+                    {
+                        if (pokerPlayer.Name == player.Name)
+                        {
+                            pokerTableManager = manager;
+                            playerPoker = pokerPlayer;
+                        }
+                    }
+                }
                 //This is an abomination.
                 poker.Poker.OnPlayerLeaveTable(player);
                 //TODO: Empty the seat the player was occupying.
@@ -278,9 +294,11 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
 
-                NAPI.Util.ConsoleOutput("PLAYER CALLED, PLAYERS IN POKERPLAYERS = "+pokerTableManager._players.Count + " ID TABLE = " + pokerTableManager.id);
+                playerPoker.playerObject.SendChatMessage("Hai fatto Call.");
+                pokerTableManager.source.Cancel();
+                NAPI.Util.ConsoleOutput("Cancelled Timeout.");
                 // Need to check if it's their turn.
-                
+
 
                 playerPoker.Call(pokerTableManager._mainPot);
                 // CLIENTSIDE -> FRONTEND INTERFACE
@@ -316,6 +334,11 @@ namespace SouthValleyFive.Scripts.Poker
                 }
 
                 playerPoker.Raise(fiches, pokerTableManager._mainPot);
+                playerPoker.playerObject.SendChatMessage("Hai Fatto un raise di "+fiches+".");
+                pokerTableManager.source.Cancel();
+                NAPI.Util.ConsoleOutput("Cancelled Timeout.");
+
+
                 // CLIENTSIDE -> FRONTEND INTERFACE
                 player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager._mainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager._mainPot.getMaximumAmountPutIn() + "}");
                 player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager._mainPot.Amount + ", 'action': 'Raise'}");
@@ -352,10 +375,10 @@ namespace SouthValleyFive.Scripts.Poker
                 }
 
                 playerPoker.Fold(pokerTableManager._mainPot);
+                playerPoker.playerObject.SendChatMessage("Hai Foldato.");
 
                 NAPI.Util.ConsoleOutput("Player Folded.");
-                timeoutToken.Cancel();
-                timeoutToken.Dispose();
+                pokerTableManager.source.Cancel();
                 NAPI.Util.ConsoleOutput("Cancelled Timeout.");
 
 
@@ -452,11 +475,6 @@ namespace SouthValleyFive.Scripts.Poker
                    "[" + card1.getSuit() + ","
                    + card2.getSuit() + "]]}");
 
-                    NAPI.Util.ConsoleOutput("POCKETCARD 1(RANK,SUIT) =" + card1.getRank()+" "+card1.getSuit());
-                    NAPI.Util.ConsoleOutput("POCKETCARD 2(RANK,SUIT) =" + card2.getRank()+" "+card2.getSuit());
-
-
-
                     //DealHoleCards(pokerPlayer.playerObject);
 
                     pokerPlayer.playerObject.TriggerEvent("UpdatePot", _mainPot.Amount);
@@ -469,14 +487,17 @@ namespace SouthValleyFive.Scripts.Poker
                 foreach (PokerPlayer pokerPlayer in _players)
                 {
                     Player player = pokerPlayer.playerObject;
-                    NAPI.Util.ConsoleOutput("CurrentIndex start turn = " + _currentIndex);
                     IncrementIndex(_currentIndex);
+                    NAPI.Util.ConsoleOutput("CurrentIndex start turn = " + _currentIndex);
+                    player.SendChatMessage("E' il tuo turno.");
 
 
                     //TIMEOUT TIMER
-                    await TimeOut(timeoutToken.Token);
+                    await TimeOut(token);
                     //Set bool to wait to play true
                     NAPI.Util.ConsoleOutput("CurrentIndex end turn= " + _currentIndex);
+                    player.SendChatMessage("Il tuo turno si è concluso.");
+
 
                 }
 
@@ -540,23 +561,8 @@ namespace SouthValleyFive.Scripts.Poker
                     pokerPlayer.AddToHand(river);
                     pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[4].getRank() + ",'seed': " + _tableHand[4].getSuit() + "}");
 
-                    NAPI.Util.ConsoleOutput("Player "+ pokerPlayer.Name);
-                    NAPI.Util.ConsoleOutput("PocketCard 1=" + pokerPlayer.GetHand()[0]);
-                    NAPI.Util.ConsoleOutput("PocketCard 2=" + pokerPlayer.GetHand()[1]);
-                    NAPI.Util.ConsoleOutput("Tablecard 1 =" + pokerPlayer.GetHand()[2]);
-                    NAPI.Util.ConsoleOutput("Tablecard 2 =" + pokerPlayer.GetHand()[3]);
-                    NAPI.Util.ConsoleOutput("Tablecard 3 =" + pokerPlayer.GetHand()[4]);
-                    NAPI.Util.ConsoleOutput("Tablecard 4 =" + pokerPlayer.GetHand()[5]);
-                    NAPI.Util.ConsoleOutput("Tablecard 5 =" + pokerPlayer.GetHand()[6]);
-
                     Hand besthand = HandCombination.getBestHandEfficiently(pokerPlayer.GetHand());
-                    NAPI.Util.ConsoleOutput("Result besthand=" + besthand);
                     pokerPlayer.SetHand(besthand);
-
-                    NAPI.Util.ConsoleOutput("Result =" + pokerPlayer.GetHand());
-
-
-
 
                 }
 
@@ -577,9 +583,18 @@ namespace SouthValleyFive.Scripts.Poker
            
         }
 
-        public async Task TimeOut(CancellationToken token)
+        public async Task TimeOut(CancellationToken cancelToken)
         {
-            await Task.Delay(10000, token);
+            int seconds = 10; //Time in seconds for timeout
+            for(int i=0; i < seconds; i++)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+                await Task.Delay(1000, token);
+            }
+            
         }
 
 

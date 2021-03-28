@@ -21,6 +21,7 @@ namespace SouthValleyFive.Scripts.Poker
         private int _turnCount;
         public string Winnermessage;
         private bool IsActive;
+        private bool playerPlaying;
         private CancellationTokenSource source= new CancellationTokenSource();
         private CancellationToken token;
         private int id;
@@ -108,6 +109,7 @@ namespace SouthValleyFive.Scripts.Poker
             _bigBlind.Position = _dealerPosition + 2;
             _currentIndex = _dealerPosition;
             this.IsActive = false;
+            this.playerPlaying = false;
         }
         public PokerTableManager(int maxPlayers,int id)
         {
@@ -295,6 +297,7 @@ namespace SouthValleyFive.Scripts.Poker
                 }
 
                 playerPoker.playerObject.SendChatMessage("Hai fatto Call.");
+                pokerTableManager.playerPlaying = false;
                 pokerTableManager.source.Cancel();
                 NAPI.Util.ConsoleOutput("Cancelled Timeout.");
                 // Need to check if it's their turn.
@@ -335,6 +338,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 playerPoker.Raise(fiches, pokerTableManager._mainPot);
                 playerPoker.playerObject.SendChatMessage("Hai Fatto un raise di "+fiches+".");
+                pokerTableManager.playerPlaying = false;
                 pokerTableManager.source.Cancel();
                 NAPI.Util.ConsoleOutput("Cancelled Timeout.");
 
@@ -378,6 +382,7 @@ namespace SouthValleyFive.Scripts.Poker
                 playerPoker.playerObject.SendChatMessage("Hai Foldato.");
 
                 NAPI.Util.ConsoleOutput("Player Folded.");
+                pokerTableManager.playerPlaying = false;
                 pokerTableManager.source.Cancel();
                 NAPI.Util.ConsoleOutput("Cancelled Timeout.");
 
@@ -484,7 +489,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 //FIRST ROUND OF BETTING
                 //Get player starting from first after big blind, do turns
-                foreach (PokerPlayer pokerPlayer in _players)
+                /*foreach (PokerPlayer pokerPlayer in _players)
                 {
                     Player player = pokerPlayer.playerObject;
                     IncrementIndex(_currentIndex);
@@ -492,14 +497,18 @@ namespace SouthValleyFive.Scripts.Poker
                     player.SendChatMessage("E' il tuo turno.");
 
 
+
                     //TIMEOUT TIMER
                     await TimeOut(token);
+                    
                     //Set bool to wait to play true
                     NAPI.Util.ConsoleOutput("CurrentIndex end turn= " + _currentIndex);
                     player.SendChatMessage("Il tuo turno si è concluso.");
 
 
-                }
+                }*/
+
+                await FirstBetAsync();
 
                 //THE FLOP
                 //The dealer burns a card, and then deals three community cards face up.
@@ -583,16 +592,44 @@ namespace SouthValleyFive.Scripts.Poker
            
         }
 
+        public async Task FirstBetAsync()
+        {
+            foreach (PokerPlayer pokerPlayer in _players)
+            {
+                IncrementIndex(_currentIndex);
+                await TimeOut(token);
+                
+            }
+            return;
+        }
+
         public async Task TimeOut(CancellationToken cancelToken)
         {
             int seconds = 10; //Time in seconds for timeout
+            int count = 0;
+            playerPlaying = true;
+            while (playerPlaying)
+            {
+                if (count >= seconds)
+                {
+                    NAPI.Util.ConsoleOutput("Timed Out.");
+                    playerPlaying = false;
+                    return;
+                }
+                else
+                {
+                    await Task.Delay(1000, token);
+                    count++;
+                    NAPI.Util.ConsoleOutput(count.ToString());
+                }
+            }
+
             for(int i=0; i < seconds; i++)
             {
                 if (token.IsCancellationRequested)
                 {
                     return;
                 }
-                await Task.Delay(1000, token);
             }
             
         }
@@ -710,11 +747,13 @@ namespace SouthValleyFive.Scripts.Poker
         {
             _players.GetPlayer(ref _smallBlind.Position).PaySmallBlind(_smallBlind.Amount, _mainPot,_currentIndex);
             _currentIndex = _smallBlind.Position;
+            _mainPot.AgressorIndex = _currentIndex;
         }
         public void PayBigBlind()
         {
             _players.GetPlayer(ref _bigBlind.Position).PayBigBlind(_bigBlind.Amount, _mainPot, _currentIndex);
             _currentIndex = _bigBlind.Position;
+            _mainPot.AgressorIndex = _currentIndex;
             _turnCount = 0;
         }
         //deal the flop
@@ -920,6 +959,9 @@ namespace SouthValleyFive.Scripts.Poker
             }
             return false;
         }
+
+        
+
         //support for "foreach" loops
         public IEnumerator<PokerPlayer> GetEnumerator()
         {

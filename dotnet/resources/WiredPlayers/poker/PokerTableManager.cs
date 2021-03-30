@@ -127,6 +127,7 @@ namespace SouthValleyFive.Scripts.Poker
             this.id = id;
             MaxPlayers = maxPlayers;
             SeatedPlayers = new PlayerList();
+            activePlayers = new PlayerList();
             CardDeck = new Deck();
             Rand = new Random();
             MainPot = new Pot();
@@ -135,7 +136,7 @@ namespace SouthValleyFive.Scripts.Poker
             _bigBlind = new Blind();
             RoundCounter = 0;
             TurnCounter = 0;
-            _dealerPosition = Rand.Next(SeatedPlayers.Count);
+            _dealerPosition = Rand.Next(activePlayers.Count);
             //set blind amount and position
             _smallBlind.Amount = 500;
             _bigBlind.Amount = 1000;
@@ -150,18 +151,18 @@ namespace SouthValleyFive.Scripts.Poker
         {
             get
             {
-                return SeatedPlayers.GetPlayer(ref index);
+                return activePlayers.GetPlayer(ref index);
             }
             set
             {
-                SeatedPlayers[index] = value;
+                activePlayers[index] = value;
             }
         }
 
         //various getters/setters
         public PlayerList GetPlayers()
         {
-            return SeatedPlayers;
+            return activePlayers;
         }
         public int GetDealerPosition()
         {
@@ -245,7 +246,6 @@ namespace SouthValleyFive.Scripts.Poker
                     else
                     {
                         player.TriggerEvent("JoinTable", json);
-
                     }
 
                 });
@@ -266,7 +266,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
+                    foreach (PokerPlayer pokerPlayer in manager.activePlayers)
                     {
                         if (pokerPlayer.Name == player.Name)
                         {
@@ -300,7 +300,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
+                    foreach (PokerPlayer pokerPlayer in manager.activePlayers)
                     {
                         if (pokerPlayer.Name == player.Name)
                         {
@@ -341,7 +341,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
+                    foreach (PokerPlayer pokerPlayer in manager.activePlayers)
                     {
                         if (pokerPlayer.Name == player.Name)
                         {
@@ -384,7 +384,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
+                    foreach (PokerPlayer pokerPlayer in manager.activePlayers)
                     {
                         if (pokerPlayer.Name == player.Name)
                         {
@@ -426,7 +426,7 @@ namespace SouthValleyFive.Scripts.Poker
         {
             setActivePlayers(SeatedPlayers);
             IsActive = true;
-            SeatedPlayers.ResetPlayers();
+            activePlayers.ResetPlayers();
             CardDeck = new Deck();
             if (RoundCounter == 10)
             {
@@ -451,7 +451,7 @@ namespace SouthValleyFive.Scripts.Poker
             Winnermessage = null;
             MainPot.getPlayersInPot().Clear();
             SidePots.Clear();
-            foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+            foreach (PokerPlayer pokerPlayer in activePlayers)
             {
                 ////Browser.ExecuteJsFunction($"StartNextMatch();");
                 pokerPlayer.playerObject.TriggerEvent("showPokerMessage", "La partita sta per cominciare...");
@@ -467,12 +467,12 @@ namespace SouthValleyFive.Scripts.Poker
                 // OPENING DEAL
                 //Pay the small and big blind, bringing currentidex to Big Blind
 
-                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+                foreach (PokerPlayer pokerPlayer in activePlayers)
                 {
 
-                    pokerPlayer.playerObject.SendChatMessage(SeatedPlayers[_currentIndex + 1].playerObject.Name + " Ha pagato " + _smallBlind.Amount + " di piccolo Buio");
+                    pokerPlayer.playerObject.SendChatMessage(activePlayers[_currentIndex + 1].playerObject.Name + " Ha pagato " + _smallBlind.Amount + " di piccolo Buio");
 
-                    pokerPlayer.playerObject.SendChatMessage(SeatedPlayers[_currentIndex + 2].playerObject.Name + " Ha pagato " + _bigBlind.Amount + " di grande Buio");
+                    pokerPlayer.playerObject.SendChatMessage(activePlayers[_currentIndex + 2].playerObject.Name + " Ha pagato " + _bigBlind.Amount + " di grande Buio");
 
                 }
 
@@ -499,7 +499,7 @@ namespace SouthValleyFive.Scripts.Poker
                 TableHand.Add(CardDeck.Deal());
                 TableHand.Add(CardDeck.Deal());
 
-                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+                foreach (PokerPlayer pokerPlayer in activePlayers)
                 {
                     //    pokerPlayer.playerObject.SendChatMessage("Card 1: "+ TableHand[0].getRank() + TableHand[0].getSuit());
                     //    pokerPlayer.playerObject.SendChatMessage("Card 2: " + TableHand[1].getRank() + TableHand[1].getSuit());
@@ -525,7 +525,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 TableHand.Add(turn);
 
-                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+                foreach (PokerPlayer pokerPlayer in activePlayers)
                 {
 
                     pokerPlayer.AddToHand(turn);
@@ -544,7 +544,7 @@ namespace SouthValleyFive.Scripts.Poker
                 Card river = CardDeck.Deal();
                 TableHand.Add(river);
 
-                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+                foreach (PokerPlayer pokerPlayer in activePlayers)
                 {
                     pokerPlayer.AddToHand(river);
                     pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + TableHand[4].getRank() + ",'seed': " + TableHand[4].getSuit() + "}");
@@ -573,7 +573,7 @@ namespace SouthValleyFive.Scripts.Poker
 
         public async Task FirstBetAsync()
         {
-            foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+            foreach (PokerPlayer pokerPlayer in activePlayers)
             {
                 IncrementIndex(_currentIndex);
                 await TimeOut(token);
@@ -621,7 +621,7 @@ namespace SouthValleyFive.Scripts.Poker
         public bool BeginNextTurn()
         {
             TurnCounter++;
-            while (SeatedPlayers[MainPot.AgressorIndex].IsFolded() && _currentIndex != MainPot.AgressorIndex)
+            while (activePlayers[MainPot.AgressorIndex].IsFolded() && _currentIndex != MainPot.AgressorIndex)
                 MainPot.AgressorIndex = DecrementIndex(MainPot.AgressorIndex);
             if (_currentIndex == MainPot.AgressorIndex && TurnCounter > 1)
                 return false;
@@ -667,11 +667,11 @@ namespace SouthValleyFive.Scripts.Poker
         public int IncrementIndex(int currentIndex)
         {
             currentIndex++;
-            while (SeatedPlayers.GetPlayer(ref currentIndex).IsFolded() || SeatedPlayers.GetPlayer(ref currentIndex).isbusted || SeatedPlayers.GetPlayer(ref currentIndex).ChipStack == 0)
+            while (activePlayers.GetPlayer(ref currentIndex).IsFolded() || activePlayers.GetPlayer(ref currentIndex).isbusted || activePlayers.GetPlayer(ref currentIndex).ChipStack == 0)
                 currentIndex++;
-            Player player = SeatedPlayers.GetPlayer(ref currentIndex).playerObject;
+            Player player = activePlayers.GetPlayer(ref currentIndex).playerObject;
             // CLIENTSIDE -> FRONTEND
-            int callValue = SeatedPlayers.GetPlayer(ref currentIndex).GetAmountToCall(MainPot);
+            int callValue = activePlayers.GetPlayer(ref currentIndex).GetAmountToCall(MainPot);
             NAPI.Util.ConsoleOutput("AMOUNT TO CALL FOR INDEX "+currentIndex+"= "+callValue);
             ////Browser.ExecuteJsFunction($"OnPlayerTurn(callValue)");
             ////Browser.ExecuteJsFunction($"ShowCards()");
@@ -683,25 +683,25 @@ namespace SouthValleyFive.Scripts.Poker
         public int IncrementIndexShowdown(int currentIndex)
         {
             currentIndex++;
-            while (SeatedPlayers.GetPlayer(ref currentIndex).IsFolded() || SeatedPlayers.GetPlayer(ref currentIndex).isbusted)
+            while (activePlayers.GetPlayer(ref currentIndex).IsFolded() || activePlayers.GetPlayer(ref currentIndex).isbusted)
                 currentIndex++;
-            SeatedPlayers.GetPlayer(ref currentIndex);
+            activePlayers.GetPlayer(ref currentIndex);
             return currentIndex;
         }
         //same as increment class except in the other direction
         public int DecrementIndex(int currentIndex)
         {
             currentIndex--;
-            while (SeatedPlayers.GetPlayer(ref currentIndex).IsFolded() || SeatedPlayers.GetPlayer(ref currentIndex).isbusted || SeatedPlayers.GetPlayer(ref currentIndex).ChipStack == 0)
+            while (activePlayers.GetPlayer(ref currentIndex).IsFolded() || activePlayers.GetPlayer(ref currentIndex).isbusted || activePlayers.GetPlayer(ref currentIndex).ChipStack == 0)
                 currentIndex--;
-            SeatedPlayers.GetPlayer(ref currentIndex);
+            activePlayers.GetPlayer(ref currentIndex);
             return currentIndex;
         }
 
         //deal two unique cards to all players
         public void DealHoleCards()
         {
-            foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+            foreach (PokerPlayer pokerPlayer in activePlayers)
             {
                 //Deal pocket cards to players in game
                 Card card1 = CardDeck.Deal();
@@ -723,13 +723,13 @@ namespace SouthValleyFive.Scripts.Poker
         //pay small/big blind amount
         public void PaySmallBlind()
         {
-            SeatedPlayers.GetPlayer(ref _smallBlind.Position).PaySmallBlind(_smallBlind.Amount, MainPot, _currentIndex);
+            activePlayers.GetPlayer(ref _smallBlind.Position).PaySmallBlind(_smallBlind.Amount, MainPot, _currentIndex);
             _currentIndex = _smallBlind.Position;
             MainPot.AgressorIndex = _currentIndex;
         }
         public void PayBigBlind()
         {
-            SeatedPlayers.GetPlayer(ref _bigBlind.Position).PayBigBlind(_bigBlind.Amount, MainPot, _currentIndex);
+            activePlayers.GetPlayer(ref _bigBlind.Position).PayBigBlind(_bigBlind.Amount, MainPot, _currentIndex);
             _currentIndex = _bigBlind.Position;
             MainPot.AgressorIndex = _currentIndex;
             TurnCounter = 0;
@@ -740,9 +740,9 @@ namespace SouthValleyFive.Scripts.Poker
             TableHand.Add(CardDeck.Deal());
             TableHand.Add(CardDeck.Deal());
             TableHand.Add(CardDeck.Deal());
-            for (int i = 0; i < SeatedPlayers.Count; i++)
+            for (int i = 0; i < activePlayers.Count; i++)
             {
-                SeatedPlayers[i].AddToHand(TableHand);
+                activePlayers[i].AddToHand(TableHand);
             }
             // CLIENTSIDE -> FRONTEND
             /*Hand _deliverTableHand = new Hand();
@@ -761,9 +761,9 @@ namespace SouthValleyFive.Scripts.Poker
         {
             Card turn = CardDeck.Deal();
             TableHand.Add(turn);
-            for (int i = 0; i < SeatedPlayers.Count; i++)
+            for (int i = 0; i < activePlayers.Count; i++)
             {
-                SeatedPlayers[i].AddToHand(turn);
+                activePlayers[i].AddToHand(turn);
             }
             // CLIENTSIDE -> FRONTEND
             ////Browser.ExecuteJsFunction($"AddTableCard(" + TableHand[TableHand.Count()-1] + ");");
@@ -774,9 +774,9 @@ namespace SouthValleyFive.Scripts.Poker
         {
             Card river = CardDeck.Deal();
             TableHand.Add(river);
-            for (int i = 0; i < SeatedPlayers.Count; i++)
+            for (int i = 0; i < activePlayers.Count; i++)
             {
-                SeatedPlayers[i].AddToHand(river);
+                activePlayers[i].AddToHand(river);
             }
             // CLIENTSIDE -> FRONTEND
             ////Browser.ExecuteJsFunction($"AddTableCard(" + TableHand[TableHand.Count()-1] + ");");
@@ -814,7 +814,7 @@ namespace SouthValleyFive.Scripts.Poker
             {
                 for (int j = 0; j < this.GetPlayers().Count; j++)
                 {
-                    if (SeatedPlayers[j] == bestHandList[i])
+                    if (activePlayers[j] == bestHandList[i])
                     {
                         winners.Add(j);
                     }
@@ -830,8 +830,8 @@ namespace SouthValleyFive.Scripts.Poker
                     if (winners.Contains(i))
                     {
                         _currentIndex = i;
-                        SeatedPlayers[i].CollectMoney(MainPot);
-                        Winnermessage += SeatedPlayers[i].Name + ", ";
+                        activePlayers[i].CollectMoney(MainPot);
+                        Winnermessage += activePlayers[i].Name + ", ";
                     }
                 }
                 Winnermessage += Environment.NewLine + " split the pot.";
@@ -839,21 +839,21 @@ namespace SouthValleyFive.Scripts.Poker
             else
             {
                 _currentIndex = winners[0];
-                SeatedPlayers[_currentIndex].CollectMoney(MainPot);
-                Winnermessage = SeatedPlayers[_currentIndex].Message;
+                activePlayers[_currentIndex].CollectMoney(MainPot);
+                Winnermessage = activePlayers[_currentIndex].Message;
             }
             // CLIENTSIDE - FRONTEND; ON MATCH COMPLETED
             for (int i = 0; i < this.GetPlayers().Count; i++)
             {
                 if (winners.Contains(i))
                 {
-                    SeatedPlayers[i].playerObject.SendChatMessage("Winner= " + SeatedPlayers[i].Name);
+                    activePlayers[i].playerObject.SendChatMessage("Winner= " + activePlayers[i].Name);
                 }
                 else
                 {
-                    SeatedPlayers[i].playerObject.SendChatMessage("Loser= " + SeatedPlayers[i].Name);
+                    activePlayers[i].playerObject.SendChatMessage("Loser= " + activePlayers[i].Name);
                 }
-                SeatedPlayers[i].playerObject.TriggerEvent("OnMatchCompleted", Winnermessage);
+                activePlayers[i].playerObject.TriggerEvent("OnMatchCompleted", Winnermessage);
             }
             //awarding sidepots
             for (int i = 0; i < SidePots.Count; i++)
@@ -862,7 +862,7 @@ namespace SouthValleyFive.Scripts.Poker
                 for (int x = 0; x < bestHandList.Count; x++)
                 {
                     for (int j = 0; j < this.GetPlayers().Count; j++)
-                        if (SeatedPlayers[j] == bestHandList[x] && SidePots[i].getPlayersInPot().Contains(bestHandList[x]))
+                        if (activePlayers[j] == bestHandList[x] && SidePots[i].getPlayersInPot().Contains(bestHandList[x]))
                         {
                             sidePotWinners.Add(j);
                         }
@@ -875,7 +875,7 @@ namespace SouthValleyFive.Scripts.Poker
                     if (sidePotWinners.Contains(j))
                     {
                         _currentIndex = j;
-                        SeatedPlayers[j].CollectMoney(SidePots[i]);
+                        activePlayers[j].CollectMoney(SidePots[i]);
                     }
                 }
             }
@@ -943,7 +943,7 @@ namespace SouthValleyFive.Scripts.Poker
         //support for "foreach" loops
         public IEnumerator<PokerPlayer> GetEnumerator()
         {
-            return SeatedPlayers.GetEnumerator();
+            return activePlayers.GetEnumerator();
         }
     }
 }

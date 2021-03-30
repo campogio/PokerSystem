@@ -10,19 +10,20 @@ namespace SouthValleyFive.Scripts.Poker
     public class PokerTableManager : Script
     {
         public static List<PokerTableManager> pokerTables = new List<PokerTableManager>();
-        private PlayerList _players = new PlayerList();
-        private int _maxPlayers;
-        private Deck _deck;
-        private Hand _tableHand = new Hand();
-        private int _roundCounter;
-        private readonly Pot _mainPot;
-        private readonly List<Pot> _sidePots;
-        private readonly Random _rand;
-        private int _turnCount;
+        private PlayerList activePlayers = new PlayerList();
+        private PlayerList SeatedPlayers = new PlayerList();
+        private int MaxPlayers;
+        private Deck CardDeck;
+        private Hand TableHand = new Hand();
+        private int RoundCounter;
+        private readonly Pot MainPot;
+        private readonly List<Pot> SidePots;
+        private readonly Random Rand;
+        private int TurnCounter;
         public string Winnermessage;
         private bool IsActive;
         private bool playerPlaying;
-        private CancellationTokenSource source= new CancellationTokenSource();
+        private CancellationTokenSource source = new CancellationTokenSource();
         private CancellationToken token;
         private int id;
         //the blind class, containing the amount of blinds, the position of the player
@@ -55,11 +56,21 @@ namespace SouthValleyFive.Scripts.Poker
         private int _currentIndex;
         private bool playing;
 
+        public void setActivePlayers(PlayerList pokerPlayers)
+        {
+            foreach (PokerPlayer player in pokerPlayers)
+            {
+                NAPI.Util.ConsoleOutput("Added "+player.Name+" To Active Players.");
+                activePlayers.Add(player);
+            }
+        }
+        
+
         //various propeties
         public int TurnCount
         {
-            get { return _turnCount; }
-            set { _turnCount = value; }
+            get { return TurnCounter; }
+            set { TurnCounter = value; }
         }
         public int SmallBlind
         {
@@ -71,8 +82,8 @@ namespace SouthValleyFive.Scripts.Poker
         }
         public int RoundCount
         {
-            get { return _roundCounter; }
-            set { _roundCounter = value; }
+            get { return RoundCounter; }
+            set { RoundCounter = value; }
         }
         /// <summary>
         /// contructor to begin the game, dealer position (and big/small blind position) is randomly choosen
@@ -85,51 +96,51 @@ namespace SouthValleyFive.Scripts.Poker
         {
 
         }
-        public PokerTableManager(PlayerList players, int maxPlayers,int id)
+        public PokerTableManager(PlayerList players, int maxPlayers, int id)
         {
             token = source.Token;
             this.id = id;
-            this._players = players;
-            _maxPlayers = maxPlayers;
-            _deck = new Deck();
-            _rand = new Random();
-            _mainPot = new Pot();
-            _sidePots = new List<Pot>();
+            this.SeatedPlayers = players;
+            MaxPlayers = maxPlayers;
+            CardDeck = new Deck();
+            Rand = new Random();
+            MainPot = new Pot();
+            SidePots = new List<Pot>();
             _smallBlind = new Blind();
             _bigBlind = new Blind();
-            _roundCounter = 0;
-            _turnCount = 0;
-            _dealerPosition = _rand.Next(players.Count);
+            RoundCounter = 0;
+            TurnCounter = 0;
+            _dealerPosition = Rand.Next(players.Count);
             //set blind amount and position
             _smallBlind.Amount = 500;
             _bigBlind.Amount = 1000;
-            _mainPot.SmallBlind = 500;
-            _mainPot.BigBlind = 1000;
+            MainPot.SmallBlind = 500;
+            MainPot.BigBlind = 1000;
             _smallBlind.Position = _dealerPosition + 1;
             _bigBlind.Position = _dealerPosition + 2;
             _currentIndex = _dealerPosition;
             this.IsActive = false;
             this.playerPlaying = false;
         }
-        public PokerTableManager(int maxPlayers,int id)
+        public PokerTableManager(int maxPlayers, int id)
         {
             this.id = id;
-            _maxPlayers = maxPlayers;
-            _players = new PlayerList();
-            _deck = new Deck();
-            _rand = new Random();
-            _mainPot = new Pot();
-            _sidePots = new List<Pot>();
+            MaxPlayers = maxPlayers;
+            SeatedPlayers = new PlayerList();
+            CardDeck = new Deck();
+            Rand = new Random();
+            MainPot = new Pot();
+            SidePots = new List<Pot>();
             _smallBlind = new Blind();
             _bigBlind = new Blind();
-            _roundCounter = 0;
-            _turnCount = 0;
-            _dealerPosition = _rand.Next(_players.Count);
+            RoundCounter = 0;
+            TurnCounter = 0;
+            _dealerPosition = Rand.Next(SeatedPlayers.Count);
             //set blind amount and position
             _smallBlind.Amount = 500;
             _bigBlind.Amount = 1000;
-            _mainPot.SmallBlind = 500;
-            _mainPot.BigBlind = 1000;
+            MainPot.SmallBlind = 500;
+            MainPot.BigBlind = 1000;
             _smallBlind.Position = _dealerPosition + 1;
             _bigBlind.Position = _dealerPosition + 2;
             _currentIndex = _dealerPosition;
@@ -139,18 +150,18 @@ namespace SouthValleyFive.Scripts.Poker
         {
             get
             {
-                return _players.GetPlayer(ref index);
+                return SeatedPlayers.GetPlayer(ref index);
             }
             set
             {
-                _players[index] = value;
+                SeatedPlayers[index] = value;
             }
         }
 
         //various getters/setters
         public PlayerList GetPlayers()
         {
-            return _players;
+            return SeatedPlayers;
         }
         public int GetDealerPosition()
         {
@@ -174,19 +185,19 @@ namespace SouthValleyFive.Scripts.Poker
         }
         public Pot GetPot()
         {
-            return _mainPot;
+            return MainPot;
         }
         public List<Pot> GetSidePots()
         {
-            return _sidePots;
+            return SidePots;
         }
         public Hand GetCommunityCards()
         {
-            return _tableHand;
+            return TableHand;
         }
         public Deck GetDeck()
         {
-            return _deck;
+            return CardDeck;
         }
         /// <summary>
         /// Remove a player when the player busts out.
@@ -196,13 +207,13 @@ namespace SouthValleyFive.Scripts.Poker
         {
             if (player.ChipStack != 0)
                 throw new InvalidOperationException();
-            _players.Remove(player);
+            SeatedPlayers.Remove(player);
         }
         public void RemovePlayer(int index)
         {
-            if (_players[index].ChipStack != 0)
+            if (SeatedPlayers[index].ChipStack != 0)
                 throw new InvalidOperationException();
-            _players.RemoveAt(index);
+            SeatedPlayers.RemoveAt(index);
         }
         [RemoteEvent("JoinPokerMatch")]
         public void JoinMatch(Player player, int amount)
@@ -211,17 +222,17 @@ namespace SouthValleyFive.Scripts.Poker
             {
                 NAPI.Task.Run(() =>
                 {
-                    if (_players.Count > _maxPlayers)
+                    if (SeatedPlayers.Count > MaxPlayers)
                     {
                         player.TriggerEvent("showPokerErrorMessage", 0);
                         return;
                     }
 
-                    _players.Add(new PokerPlayer(player.Name, amount, player));
-                    NAPI.Util.ConsoleOutput(player.Name + " JOINED TABLE, PLAYER COUNT = " + _players.Count+" ID TABLE = "+ id);
-                    string json = "{'fiches': " + amount + ", 'pot': " + _mainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + _tableHand + "'}";
+                    SeatedPlayers.Add(new PokerPlayer(player.Name, amount, player));
+                    NAPI.Util.ConsoleOutput(player.Name + " JOINED TABLE, PLAYER COUNT = " + SeatedPlayers.Count + " ID TABLE = " + id);
+                    string json = "{'fiches': " + amount + ", 'pot': " + MainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + TableHand + "'}";
 
-                    if (_players.Count >= 2)
+                    if (SeatedPlayers.Count >= 2)
                     {
 
                         player.TriggerEvent("JoinTable", json);
@@ -239,11 +250,11 @@ namespace SouthValleyFive.Scripts.Poker
 
                 });
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 NAPI.Util.ConsoleOutput(e.StackTrace);
             }
-            
+
         }
         [RemoteEvent("pokerLeave")]
         public void PokerLeaveEvent(Player player)
@@ -255,7 +266,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach (PokerPlayer pokerPlayer in manager._players)
+                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
                     {
                         if (pokerPlayer.Name == player.Name)
                         {
@@ -268,28 +279,31 @@ namespace SouthValleyFive.Scripts.Poker
                 poker.Poker.OnPlayerLeaveTable(player);
                 //TODO: Empty the seat the player was occupying.
 
-            /*    if (_players.Count >= 2)
-                {
-                    StartNextMatch();
-                }   */
-            } catch (Exception e)
+                /*    if (SeatedPlayers.Count >= 2)
+                    {
+                        StartNextMatch();
+                    }   */
+            }
+            catch (Exception e)
             {
                 NAPI.Util.ConsoleOutput(e.StackTrace);
             }
 
-        } 
+        }
         [RemoteEvent("PokerCallEvent")]
-        public void PlayerCall(Player player) {
+        public void PlayerCall(Player player)
+        {
             try
             {
-                PokerTableManager pokerTableManager=null;
-                PokerPlayer playerPoker= null;
+                PokerTableManager pokerTableManager = null;
+                PokerPlayer playerPoker = null;
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach(PokerPlayer pokerPlayer in manager._players)
+                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
                     {
-                        if(pokerPlayer.Name == player.Name){
+                        if (pokerPlayer.Name == player.Name)
+                        {
                             pokerTableManager = manager;
                             playerPoker = pokerPlayer;
                         }
@@ -303,21 +317,22 @@ namespace SouthValleyFive.Scripts.Poker
                 // Need to check if it's their turn.
 
 
-                playerPoker.Call(pokerTableManager._mainPot);
+                playerPoker.Call(pokerTableManager.MainPot);
                 // CLIENTSIDE -> FRONTEND INTERFACE
-                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager._mainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager._mainPot.getMaximumAmountPutIn() + "}");
-                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager._mainPot.Amount + ", 'action': 'Call'}");
-                //Browser.ExecuteJsFunction("OnPlayerRaiseUpdated({minRaise:"+ _mainPot.MinimumRaise +", maxRaise:"+ _mainPot.getMaximumAmountPutIn() +"});");
-                //Browser.ExecuteJsFunction("OnPlayerPlayed({updatedPot:"+ _mainPot.Amount +", action:'Call'});");
+                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager.MainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager.MainPot.getMaximumAmountPutIn() + "}");
+                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager.MainPot.Amount + ", 'action': 'Call'}");
+                //Browser.ExecuteJsFunction("OnPlayerRaiseUpdated({minRaise:"+ MainPot.MinimumRaise +", maxRaise:"+ MainPot.getMaximumAmountPutIn() +"});");
+                //Browser.ExecuteJsFunction("OnPlayerPlayed({updatedPot:"+ MainPot.Amount +", action:'Call'});");
             }
             catch (Exception e)
             {
                 NAPI.Util.ConsoleOutput(e.StackTrace);
             }
-            
+
         }
         [RemoteEvent("PokerRaiseEvent")]
-        public void PlayerRaise(Player player, int fiches) {
+        public void PlayerRaise(Player player, int fiches)
+        {
             try
             {
                 // Need to check if it's their turn.
@@ -326,7 +341,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach (PokerPlayer pokerPlayer in manager._players)
+                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
                     {
                         if (pokerPlayer.Name == player.Name)
                         {
@@ -336,22 +351,22 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
 
-                playerPoker.Raise(fiches, pokerTableManager._mainPot);
-                playerPoker.playerObject.SendChatMessage("Hai Fatto un raise di "+fiches+".");
+                playerPoker.Raise(fiches, pokerTableManager.MainPot);
+                playerPoker.playerObject.SendChatMessage("Hai Fatto un raise di " + fiches + ".");
                 pokerTableManager.playerPlaying = false;
                 pokerTableManager.source.Cancel();
                 NAPI.Util.ConsoleOutput("Cancelled Timeout.");
 
 
                 // CLIENTSIDE -> FRONTEND INTERFACE
-                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager._mainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager._mainPot.getMaximumAmountPutIn() + "}");
-                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager._mainPot.Amount + ", 'action': 'Raise'}");
+                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager.MainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager.MainPot.getMaximumAmountPutIn() + "}");
+                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager.MainPot.Amount + ", 'action': 'Raise'}");
             }
             catch (Exception e)
             {
                 NAPI.Util.ConsoleOutput(e.StackTrace);
             }
-            
+
         }
         /*mp.events.add({
             "PokerRaiseEvent": fiches => {
@@ -359,7 +374,8 @@ namespace SouthValleyFive.Scripts.Poker
             },
         })*/
         [RemoteEvent("PokerFoldEvent")]
-        public void PlayerFold(Player player) {
+        public void PlayerFold(Player player)
+        {
             try
             {
                 // Need to check if it's their turn.
@@ -368,7 +384,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 foreach (PokerTableManager manager in pokerTables)
                 {
-                    foreach (PokerPlayer pokerPlayer in manager._players)
+                    foreach (PokerPlayer pokerPlayer in manager.SeatedPlayers)
                     {
                         if (pokerPlayer.Name == player.Name)
                         {
@@ -378,7 +394,7 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
 
-                playerPoker.Fold(pokerTableManager._mainPot);
+                playerPoker.Fold(pokerTableManager.MainPot);
                 playerPoker.playerObject.SendChatMessage("Hai Foldato.");
 
                 NAPI.Util.ConsoleOutput("Player Folded.");
@@ -390,17 +406,17 @@ namespace SouthValleyFive.Scripts.Poker
                 //Set bool playing to false
 
                 // CLIENTSIDE -> FRONTEND INTERFACE
-                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager._mainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager._mainPot.getMaximumAmountPutIn() + "}");
-                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager._mainPot.Amount + ", 'action': 'Fold'}");
+                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager.MainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager.MainPot.getMaximumAmountPutIn() + "}");
+                player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager.MainPot.Amount + ", 'action': 'Fold'}");
             }
             catch (Exception e)
             {
                 NAPI.Util.ConsoleOutput(e.StackTrace);
             }
 
-            
+
         }
-        
+
         /// <summary>
         /// Start a new round, dealer/smallblind position are moved up one spot
         /// players/counter variables are reset
@@ -408,33 +424,34 @@ namespace SouthValleyFive.Scripts.Poker
         /// </summary>
         public void StartNextMatch()
         {
+            setActivePlayers(SeatedPlayers);
             IsActive = true;
-            _players.ResetPlayers();
-            _deck = new Deck();
-            if (_roundCounter == 10)
+            SeatedPlayers.ResetPlayers();
+            CardDeck = new Deck();
+            if (RoundCounter == 10)
             {
-                _roundCounter = 0;
+                RoundCounter = 0;
                 _smallBlind.Amount *= 2;
                 _bigBlind.Amount = _smallBlind.Amount * 2;
-                _mainPot.SmallBlind = SmallBlind;
-                _mainPot.BigBlind = BigBlind;
+                MainPot.SmallBlind = SmallBlind;
+                MainPot.BigBlind = BigBlind;
             }
-            if (_roundCounter != 0)
+            if (RoundCounter != 0)
             {
                 _dealerPosition = IncrementIndex(_dealerPosition);
                 _smallBlind.Position = IncrementIndex(_dealerPosition);
                 _bigBlind.Position = IncrementIndex(_smallBlind.Position);
             }
-            _roundCounter++;
-            _mainPot.Amount = 0;
-            _mainPot.AgressorIndex = -1;
-            _mainPot.MinimumRaise = _bigBlind.Amount;
-            _tableHand.Clear();
+            RoundCounter++;
+            MainPot.Amount = 0;
+            MainPot.AgressorIndex = -1;
+            MainPot.MinimumRaise = _bigBlind.Amount;
+            TableHand.Clear();
             _currentIndex = _dealerPosition;
             Winnermessage = null;
-            _mainPot.getPlayersInPot().Clear();
-            _sidePots.Clear();
-            foreach (PokerPlayer pokerPlayer in _players)
+            MainPot.getPlayersInPot().Clear();
+            SidePots.Clear();
+            foreach (PokerPlayer pokerPlayer in SeatedPlayers)
             {
                 ////Browser.ExecuteJsFunction($"StartNextMatch();");
                 pokerPlayer.playerObject.TriggerEvent("showPokerMessage", "La partita sta per cominciare...");
@@ -450,12 +467,12 @@ namespace SouthValleyFive.Scripts.Poker
                 // OPENING DEAL
                 //Pay the small and big blind, bringing currentidex to Big Blind
 
-                foreach (PokerPlayer pokerPlayer in _players)
+                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
                 {
 
-                    pokerPlayer.playerObject.SendChatMessage(_players[_currentIndex + 1].playerObject.Name + " Ha pagato " + _smallBlind.Amount + " di piccolo Buio");
+                    pokerPlayer.playerObject.SendChatMessage(SeatedPlayers[_currentIndex + 1].playerObject.Name + " Ha pagato " + _smallBlind.Amount + " di piccolo Buio");
 
-                    pokerPlayer.playerObject.SendChatMessage(_players[_currentIndex + 2].playerObject.Name + " Ha pagato " + _bigBlind.Amount + " di grande Buio");
+                    pokerPlayer.playerObject.SendChatMessage(SeatedPlayers[_currentIndex + 2].playerObject.Name + " Ha pagato " + _bigBlind.Amount + " di grande Buio");
 
                 }
 
@@ -463,51 +480,12 @@ namespace SouthValleyFive.Scripts.Poker
 
                 PayBigBlind();
 
-                _deck.Shuffle();
+                CardDeck.Shuffle();
 
-                foreach (PokerPlayer pokerPlayer in _players)
-                {
-                    //Deal pocket cards to players in game
-                    Card card1 = _deck.Deal();
-                    Card card2 = _deck.Deal();
-
-                    pokerPlayer.AddToHand(card1);
-                    pokerPlayer.AddToHand(card2);
-
-                    pokerPlayer.playerObject.TriggerEvent("GiveCards",
-                   "{\"cards\":[[" + card1.getRank() + ","
-                   + card2.getRank() + "]," +
-                   "[" + card1.getSuit() + ","
-                   + card2.getSuit() + "]]}");
-
-                    //DealHoleCards(pokerPlayer.playerObject);
-
-                    pokerPlayer.playerObject.TriggerEvent("UpdatePot", _mainPot.Amount);
-
-                }
-
+                DealHoleCards();
 
                 //FIRST ROUND OF BETTING
-                //Get player starting from first after big blind, do turns
-                /*foreach (PokerPlayer pokerPlayer in _players)
-                {
-                    Player player = pokerPlayer.playerObject;
-                    IncrementIndex(_currentIndex);
-                    NAPI.Util.ConsoleOutput("CurrentIndex start turn = " + _currentIndex);
-                    player.SendChatMessage("E' il tuo turno.");
-
-
-
-                    //TIMEOUT TIMER
-                    await TimeOut(token);
-                    
-                    //Set bool to wait to play true
-                    NAPI.Util.ConsoleOutput("CurrentIndex end turn= " + _currentIndex);
-                    player.SendChatMessage("Il tuo turno si è concluso.");
-
-
-                }*/
-
+                //Get player starting from first after big blind, do turns        
                 await FirstBetAsync();
 
                 //THE FLOP
@@ -515,23 +493,23 @@ namespace SouthValleyFive.Scripts.Poker
                 //The first three cards are referred to as the flop, while all of the community cards are collectively called the board. 
 
                 //Burn a card
-                _deck.Deal();
+                CardDeck.Deal();
                 //Add three cards to table
-                _tableHand.Add(_deck.Deal());
-                _tableHand.Add(_deck.Deal());
-                _tableHand.Add(_deck.Deal());
+                TableHand.Add(CardDeck.Deal());
+                TableHand.Add(CardDeck.Deal());
+                TableHand.Add(CardDeck.Deal());
 
-                foreach (PokerPlayer pokerPlayer in _players)
+                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
                 {
-                    //    pokerPlayer.playerObject.SendChatMessage("Card 1: "+ _tableHand[0].getRank() + _tableHand[0].getSuit());
-                    //    pokerPlayer.playerObject.SendChatMessage("Card 2: " + _tableHand[1].getRank() + _tableHand[1].getSuit());
-                    //    pokerPlayer.playerObject.SendChatMessage("Card 3: " + _tableHand[2].getRank() + _tableHand[2].getSuit());
+                    //    pokerPlayer.playerObject.SendChatMessage("Card 1: "+ TableHand[0].getRank() + TableHand[0].getSuit());
+                    //    pokerPlayer.playerObject.SendChatMessage("Card 2: " + TableHand[1].getRank() + TableHand[1].getSuit());
+                    //    pokerPlayer.playerObject.SendChatMessage("Card 3: " + TableHand[2].getRank() + TableHand[2].getSuit());
 
-                    pokerPlayer.AddToHand(_tableHand);
+                    pokerPlayer.AddToHand(TableHand);
 
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[0].getRank() + ",'seed': " + _tableHand[0].getSuit() + "}");
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[1].getRank() + ",'seed': " + _tableHand[1].getSuit() + "}");
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[2].getRank() + ",'seed': " + _tableHand[2].getSuit() + "}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + TableHand[0].getRank() + ",'seed': " + TableHand[0].getSuit() + "}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + TableHand[1].getRank() + ",'seed': " + TableHand[1].getSuit() + "}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + TableHand[2].getRank() + ",'seed': " + TableHand[2].getSuit() + "}");
 
                 }
 
@@ -542,15 +520,16 @@ namespace SouthValleyFive.Scripts.Poker
                 //The dealer burns another card, and then adds a fourth card face-up to the community cards.
                 //This fourth card is known as the turn card, or fourth street.
 
-                _deck.Deal();
-                Card turn = _deck.Deal();
+                CardDeck.Deal();
+                Card turn = CardDeck.Deal();
 
-                _tableHand.Add(turn);
+                TableHand.Add(turn);
 
-                foreach(PokerPlayer pokerPlayer in _players){
+                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
+                {
 
                     pokerPlayer.AddToHand(turn);
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[3].getRank() + ",'seed': " + _tableHand[3].getSuit() + "}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + TableHand[3].getRank() + ",'seed': " + TableHand[3].getSuit() + "}");
 
                 }
 
@@ -561,14 +540,14 @@ namespace SouthValleyFive.Scripts.Poker
                 //The dealer burns another card, and then adds a fifth and final card to the community cards. 
                 //This fifth card is known as the river card, or fifth street. 
 
-                _deck.Deal();
-                Card river = _deck.Deal();
-                _tableHand.Add(river);
+                CardDeck.Deal();
+                Card river = CardDeck.Deal();
+                TableHand.Add(river);
 
-                foreach (PokerPlayer pokerPlayer in _players)
+                foreach (PokerPlayer pokerPlayer in SeatedPlayers)
                 {
                     pokerPlayer.AddToHand(river);
-                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + _tableHand[4].getRank() + ",'seed': " + _tableHand[4].getSuit() + "}");
+                    pokerPlayer.playerObject.TriggerEvent("AddTableCard", "{'card':" + TableHand[4].getRank() + ",'seed': " + TableHand[4].getSuit() + "}");
 
                     Hand besthand = HandCombination.getBestHandEfficiently(pokerPlayer.GetHand());
                     pokerPlayer.SetHand(besthand);
@@ -589,16 +568,16 @@ namespace SouthValleyFive.Scripts.Poker
             {
                 NAPI.Util.ConsoleOutput(e.StackTrace);
             }
-           
+
         }
 
         public async Task FirstBetAsync()
         {
-            foreach (PokerPlayer pokerPlayer in _players)
+            foreach (PokerPlayer pokerPlayer in SeatedPlayers)
             {
                 IncrementIndex(_currentIndex);
                 await TimeOut(token);
-                
+
             }
             return;
         }
@@ -624,14 +603,14 @@ namespace SouthValleyFive.Scripts.Poker
                 }
             }
 
-            for(int i=0; i < seconds; i++)
+            for (int i = 0; i < seconds; i++)
             {
                 if (token.IsCancellationRequested)
                 {
                     return;
                 }
             }
-            
+
         }
 
 
@@ -641,10 +620,10 @@ namespace SouthValleyFive.Scripts.Poker
         /// <returns></returns>
         public bool BeginNextTurn()
         {
-            _turnCount++;
-            while (_players[_mainPot.AgressorIndex].IsFolded()&&_currentIndex!=_mainPot.AgressorIndex)
-                _mainPot.AgressorIndex = DecrementIndex(_mainPot.AgressorIndex);
-            if (_currentIndex == _mainPot.AgressorIndex && _turnCount > 1)
+            TurnCounter++;
+            while (SeatedPlayers[MainPot.AgressorIndex].IsFolded() && _currentIndex != MainPot.AgressorIndex)
+                MainPot.AgressorIndex = DecrementIndex(MainPot.AgressorIndex);
+            if (_currentIndex == MainPot.AgressorIndex && TurnCounter > 1)
                 return false;
             else if (EveryoneAllIn())
                 return false;
@@ -664,7 +643,7 @@ namespace SouthValleyFive.Scripts.Poker
                     zeroCount++;
                 totalCount++;
             }
-            if (zeroCount != 0 && totalCount==zeroCount)
+            if (zeroCount != 0 && totalCount == zeroCount)
                 return true;
             else if (totalCount - zeroCount == 1)
             {
@@ -672,13 +651,13 @@ namespace SouthValleyFive.Scripts.Poker
                 {
                     if (this[i].isbusted || this[i].IsFolded())
                         continue;
-                    if (this[i].ChipStack != 0 && this[i].GetAmountToCall(_mainPot) == 0)
+                    if (this[i].ChipStack != 0 && this[i].GetAmountToCall(MainPot) == 0)
                         return true;
                 }
             }
             return false;
         }
-        
+
         /// <summary>
         /// increment index, skipping folded players, busted players and supports 
         ///wrapping around classes
@@ -688,11 +667,12 @@ namespace SouthValleyFive.Scripts.Poker
         public int IncrementIndex(int currentIndex)
         {
             currentIndex++;
-            while (_players.GetPlayer(ref currentIndex).IsFolded()||_players.GetPlayer(ref currentIndex).isbusted||_players.GetPlayer(ref currentIndex).ChipStack==0)
+            while (SeatedPlayers.GetPlayer(ref currentIndex).IsFolded() || SeatedPlayers.GetPlayer(ref currentIndex).isbusted || SeatedPlayers.GetPlayer(ref currentIndex).ChipStack == 0)
                 currentIndex++;
-            Player player = _players.GetPlayer(ref currentIndex).playerObject;
+            Player player = SeatedPlayers.GetPlayer(ref currentIndex).playerObject;
             // CLIENTSIDE -> FRONTEND
-            int callValue = _players.GetPlayer(ref currentIndex).GetAmountToCall(_mainPot);
+            int callValue = SeatedPlayers.GetPlayer(ref currentIndex).GetAmountToCall(MainPot);
+            NAPI.Util.ConsoleOutput("AMOUNT TO CALL FOR INDEX "+currentIndex+"= "+callValue);
             ////Browser.ExecuteJsFunction($"OnPlayerTurn(callValue)");
             ////Browser.ExecuteJsFunction($"ShowCards()");
             player.TriggerEvent("OnPlayerTurn", callValue);
@@ -703,106 +683,104 @@ namespace SouthValleyFive.Scripts.Poker
         public int IncrementIndexShowdown(int currentIndex)
         {
             currentIndex++;
-            while (_players.GetPlayer(ref currentIndex).IsFolded() || _players.GetPlayer(ref currentIndex).isbusted)
+            while (SeatedPlayers.GetPlayer(ref currentIndex).IsFolded() || SeatedPlayers.GetPlayer(ref currentIndex).isbusted)
                 currentIndex++;
-            _players.GetPlayer(ref currentIndex);
+            SeatedPlayers.GetPlayer(ref currentIndex);
             return currentIndex;
         }
         //same as increment class except in the other direction
         public int DecrementIndex(int currentIndex)
         {
             currentIndex--;
-            while (_players.GetPlayer(ref currentIndex).IsFolded() || _players.GetPlayer(ref currentIndex).isbusted || _players.GetPlayer(ref currentIndex).ChipStack == 0)
+            while (SeatedPlayers.GetPlayer(ref currentIndex).IsFolded() || SeatedPlayers.GetPlayer(ref currentIndex).isbusted || SeatedPlayers.GetPlayer(ref currentIndex).ChipStack == 0)
                 currentIndex--;
-            _players.GetPlayer(ref currentIndex);
+            SeatedPlayers.GetPlayer(ref currentIndex);
             return currentIndex;
         }
 
         //deal two unique cards to all players
-        public void DealHoleCards(Player player)
+        public void DealHoleCards()
         {
-            _deck.Shuffle();
-            for (int i = 0; i < _players.Count; i++)
+            foreach (PokerPlayer pokerPlayer in SeatedPlayers)
             {
-                if (i == 0)
-                {
-                    _players[i].AddToHand(_deck.Deal());
-                    _players[i].AddToHand(_deck.Deal());
-                }
-                else
-                {
-                    _players[i].AddToHand(_deck.Deal(false));
-                    _players[i].AddToHand(_deck.Deal(false));
-               }
-                ////Browser.ExecuteJsFunction($"GiveCards('{_players[i].getHand()}');");
-               player.TriggerEvent("GiveCards",
-                   "{\"cards\":[[" + _players[i].GetHand().getCard(0).getRank() + ","
-                   + _players[i].GetHand().getCard(1).getRank()+ "]," +
-                   "["+ _players[i].GetHand().getCard(0).getSuit() + ","
-                   + _players[i].GetHand().getCard(1).getSuit() +"]]}");
+                //Deal pocket cards to players in game
+                Card card1 = CardDeck.Deal();
+                Card card2 = CardDeck.Deal();
+
+                pokerPlayer.AddToHand(card1);
+                pokerPlayer.AddToHand(card2);
+
+                pokerPlayer.playerObject.TriggerEvent("GiveCards",
+               "{\"cards\":[[" + card1.getRank() + ","
+               + card2.getRank() + "]," +
+               "[" + card1.getSuit() + ","
+               + card2.getSuit() + "]]}");
+
+                pokerPlayer.playerObject.TriggerEvent("UpdatePot", MainPot.Amount);
+
             }
         }
         //pay small/big blind amount
         public void PaySmallBlind()
         {
-            _players.GetPlayer(ref _smallBlind.Position).PaySmallBlind(_smallBlind.Amount, _mainPot,_currentIndex);
+            SeatedPlayers.GetPlayer(ref _smallBlind.Position).PaySmallBlind(_smallBlind.Amount, MainPot, _currentIndex);
             _currentIndex = _smallBlind.Position;
-            _mainPot.AgressorIndex = _currentIndex;
+            MainPot.AgressorIndex = _currentIndex;
         }
         public void PayBigBlind()
         {
-            _players.GetPlayer(ref _bigBlind.Position).PayBigBlind(_bigBlind.Amount, _mainPot, _currentIndex);
+            SeatedPlayers.GetPlayer(ref _bigBlind.Position).PayBigBlind(_bigBlind.Amount, MainPot, _currentIndex);
             _currentIndex = _bigBlind.Position;
-            _mainPot.AgressorIndex = _currentIndex;
-            _turnCount = 0;
+            MainPot.AgressorIndex = _currentIndex;
+            TurnCounter = 0;
         }
         //deal the flop
         public void DealFlop(Player player)
         {
-            _tableHand.Add(_deck.Deal());
-            _tableHand.Add(_deck.Deal());
-            _tableHand.Add(_deck.Deal());
-            for (int i = 0; i < _players.Count; i++)
+            TableHand.Add(CardDeck.Deal());
+            TableHand.Add(CardDeck.Deal());
+            TableHand.Add(CardDeck.Deal());
+            for (int i = 0; i < SeatedPlayers.Count; i++)
             {
-                _players[i].AddToHand(_tableHand);
+                SeatedPlayers[i].AddToHand(TableHand);
             }
             // CLIENTSIDE -> FRONTEND
             /*Hand _deliverTableHand = new Hand();
-            _deliverTableHand.Add(_tableHand[_tableHand.Count-3]);
-            _deliverTableHand.Add(_tableHand[_tableHand.Count-2]);
-            _deliverTableHand.Add(_tableHand[_tableHand.Count-1]);*/
-            ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-3] + ");");
-            ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-2] + ");");
-            ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-1] + ");");
-            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-3]+"}");
-            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-2]+"}");
-            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-1]+"}");
+            _deliverTableHand.Add(TableHand[TableHand.Count-3]);
+            _deliverTableHand.Add(TableHand[TableHand.Count-2]);
+            _deliverTableHand.Add(TableHand[TableHand.Count-1]);*/
+            ////Browser.ExecuteJsFunction($"AddTableCard(" + TableHand[TableHand.Count()-3] + ");");
+            ////Browser.ExecuteJsFunction($"AddTableCard(" + TableHand[TableHand.Count()-2] + ");");
+            ////Browser.ExecuteJsFunction($"AddTableCard(" + TableHand[TableHand.Count()-1] + ");");
+            player.TriggerEvent("AddTableCard", "{hand: " + TableHand[TableHand.Count() - 3] + "}");
+            player.TriggerEvent("AddTableCard", "{hand: " + TableHand[TableHand.Count() - 2] + "}");
+            player.TriggerEvent("AddTableCard", "{hand: " + TableHand[TableHand.Count() - 1] + "}");
         }
         //deal the turn
         public void DealTurn(Player player)
         {
-            Card turn = _deck.Deal();
-            _tableHand.Add(turn);
-            for (int i = 0; i < _players.Count; i++)
+            Card turn = CardDeck.Deal();
+            TableHand.Add(turn);
+            for (int i = 0; i < SeatedPlayers.Count; i++)
             {
-                _players[i].AddToHand(turn);
+                SeatedPlayers[i].AddToHand(turn);
             }
             // CLIENTSIDE -> FRONTEND
-            ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-1] + ");");
-            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-1]+"}");
+            ////Browser.ExecuteJsFunction($"AddTableCard(" + TableHand[TableHand.Count()-1] + ");");
+            player.TriggerEvent("AddTableCard", "{hand: " + TableHand[TableHand.Count() - 1] + "}");
         }
         //deal the river
         public void DealRiver(Player player)
         {
-            Card river = _deck.Deal();
-            _tableHand.Add(river);
-            for (int i = 0; i < _players.Count; i++)
+            Card river = CardDeck.Deal();
+            TableHand.Add(river);
+            for (int i = 0; i < SeatedPlayers.Count; i++)
             {
-                _players[i].AddToHand(river);
+                SeatedPlayers[i].AddToHand(river);
             }
             // CLIENTSIDE -> FRONTEND
-            ////Browser.ExecuteJsFunction($"AddTableCard(" + _tableHand[_tableHand.Count()-1] + ");");
-            player.TriggerEvent("AddTableCard", "{hand: "+_tableHand[_tableHand.Count()-1]+"}");
+            ////Browser.ExecuteJsFunction($"AddTableCard(" + TableHand[TableHand.Count()-1] + ");");
+            player.TriggerEvent("AddTableCard", "{hand: " + TableHand[TableHand.Count() - 1] + "}");
 
         }
         //showdown code!
@@ -811,32 +789,32 @@ namespace SouthValleyFive.Scripts.Poker
             //creating sidepots
             if (CreateSidePots())
             {
-                _mainPot.getPlayersInPot().Sort();
-                
-                for (int i = 0; i < _mainPot.getPlayersInPot().Count - 1; i++)
+                MainPot.getPlayersInPot().Sort();
+
+                for (int i = 0; i < MainPot.getPlayersInPot().Count - 1; i++)
                 {
-                    if (_mainPot.getPlayersInPot()[i].AmountInPot != _mainPot.getPlayersInPot()[i + 1].AmountInPot)
+                    if (MainPot.getPlayersInPot()[i].AmountInPot != MainPot.getPlayersInPot()[i + 1].AmountInPot)
                     {
                         PlayerList tempPlayers = new PlayerList();
-                        for (int j = _mainPot.getPlayersInPot().Count - 1; j > i; j--)
+                        for (int j = MainPot.getPlayersInPot().Count - 1; j > i; j--)
                         {
-                            tempPlayers.Add(_mainPot.getPlayersInPot()[j]);
+                            tempPlayers.Add(MainPot.getPlayersInPot()[j]);
                         }
-                        int potSize = (_mainPot.getPlayersInPot()[i + 1].AmountInPot - _mainPot.getPlayersInPot()[i].AmountInPot) * tempPlayers.Count;
-                        _mainPot.Amount -= potSize;
-                        _sidePots.Add(new Pot(potSize, tempPlayers));
+                        int potSize = (MainPot.getPlayersInPot()[i + 1].AmountInPot - MainPot.getPlayersInPot()[i].AmountInPot) * tempPlayers.Count;
+                        MainPot.Amount -= potSize;
+                        SidePots.Add(new Pot(potSize, tempPlayers));
                     }
                 }
             }
             //awarding mainpot
             PlayerList bestHandList = new PlayerList();
             List<int> winners = new List<int>();
-            bestHandList = QuickSortBestHand(new PlayerList(_mainPot.getPlayersInPot()));
+            bestHandList = QuickSortBestHand(new PlayerList(MainPot.getPlayersInPot()));
             for (int i = 0; i < bestHandList.Count; i++)
             {
                 for (int j = 0; j < this.GetPlayers().Count; j++)
                 {
-                    if (_players[j] == bestHandList[i])
+                    if (SeatedPlayers[j] == bestHandList[i])
                     {
                         winners.Add(j);
                     }
@@ -844,7 +822,7 @@ namespace SouthValleyFive.Scripts.Poker
                         break;
                 }
             }
-            _mainPot.Amount /= winners.Count;
+            MainPot.Amount /= winners.Count;
             if (winners.Count > 1)
             {
                 for (int i = 0; i < this.GetPlayers().Count; i++)
@@ -852,52 +830,52 @@ namespace SouthValleyFive.Scripts.Poker
                     if (winners.Contains(i))
                     {
                         _currentIndex = i;
-                        _players[i].CollectMoney(_mainPot);
-                        Winnermessage += _players[i].Name + ", ";
+                        SeatedPlayers[i].CollectMoney(MainPot);
+                        Winnermessage += SeatedPlayers[i].Name + ", ";
                     }
                 }
-                Winnermessage +=Environment.NewLine+ " split the pot.";
+                Winnermessage += Environment.NewLine + " split the pot.";
             }
             else
             {
                 _currentIndex = winners[0];
-                _players[_currentIndex].CollectMoney(_mainPot);
-                Winnermessage = _players[_currentIndex].Message;
+                SeatedPlayers[_currentIndex].CollectMoney(MainPot);
+                Winnermessage = SeatedPlayers[_currentIndex].Message;
             }
             // CLIENTSIDE - FRONTEND; ON MATCH COMPLETED
             for (int i = 0; i < this.GetPlayers().Count; i++)
             {
                 if (winners.Contains(i))
                 {
-                    _players[i].playerObject.SendChatMessage("Winner= " + _players[i].Name);
+                    SeatedPlayers[i].playerObject.SendChatMessage("Winner= " + SeatedPlayers[i].Name);
                 }
                 else
                 {
-                    _players[i].playerObject.SendChatMessage("Loser= " + _players[i].Name);
+                    SeatedPlayers[i].playerObject.SendChatMessage("Loser= " + SeatedPlayers[i].Name);
                 }
-                _players[i].playerObject.TriggerEvent("OnMatchCompleted", Winnermessage);
+                SeatedPlayers[i].playerObject.TriggerEvent("OnMatchCompleted", Winnermessage);
             }
             //awarding sidepots
-            for (int i = 0; i < _sidePots.Count; i++)
+            for (int i = 0; i < SidePots.Count; i++)
             {
                 List<int> sidePotWinners = new List<int>();
                 for (int x = 0; x < bestHandList.Count; x++)
                 {
                     for (int j = 0; j < this.GetPlayers().Count; j++)
-                        if (_players[j] == bestHandList[x]&&_sidePots[i].getPlayersInPot().Contains(bestHandList[x]))
+                        if (SeatedPlayers[j] == bestHandList[x] && SidePots[i].getPlayersInPot().Contains(bestHandList[x]))
                         {
                             sidePotWinners.Add(j);
                         }
-                    if (HandCombination.getBestHand(new Hand(bestHandList[x].GetHand())) != HandCombination.getBestHand(new Hand(bestHandList[x + 1].GetHand()))&&sidePotWinners.Count!=0)
+                    if (HandCombination.getBestHand(new Hand(bestHandList[x].GetHand())) != HandCombination.getBestHand(new Hand(bestHandList[x + 1].GetHand())) && sidePotWinners.Count != 0)
                         break;
                 }
-                _sidePots[i].Amount /= sidePotWinners.Count;
+                SidePots[i].Amount /= sidePotWinners.Count;
                 for (int j = 0; j < this.GetPlayers().Count; j++)
                 {
                     if (sidePotWinners.Contains(j))
                     {
                         _currentIndex = j;
-                        _players[j].CollectMoney(_sidePots[i]);
+                        SeatedPlayers[j].CollectMoney(SidePots[i]);
                     }
                 }
             }
@@ -906,9 +884,9 @@ namespace SouthValleyFive.Scripts.Poker
         //check if it is necessary to create sidepots
         private bool CreateSidePots()
         {
-            for(int i=0;i<_mainPot.getPlayersInPot().Count()-1;i++)
+            for (int i = 0; i < MainPot.getPlayersInPot().Count() - 1; i++)
             {
-                if (_mainPot.getPlayersInPot()[i].AmountInPot != _mainPot.getPlayersInPot()[i + 1].AmountInPot)
+                if (MainPot.getPlayersInPot()[i].AmountInPot != MainPot.getPlayersInPot()[i + 1].AmountInPot)
                     return true;
             }
             return false;
@@ -947,7 +925,7 @@ namespace SouthValleyFive.Scripts.Poker
         //check if everyone has folded except the player
         public bool PlayerWon()
         {
-            if (_mainPot.getPlayersInPot().Count == 1)
+            if (MainPot.getPlayersInPot().Count == 1)
             {
                 foreach (PokerPlayer player in this)
                 {
@@ -960,12 +938,12 @@ namespace SouthValleyFive.Scripts.Poker
             return false;
         }
 
-        
+
 
         //support for "foreach" loops
         public IEnumerator<PokerPlayer> GetEnumerator()
         {
-            return _players.GetEnumerator();
+            return SeatedPlayers.GetEnumerator();
         }
     }
 }

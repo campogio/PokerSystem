@@ -79,12 +79,14 @@ function updatePot(newPot) {
 // Function: update fiches (both variable & on page)
 function updateFiches(newFiches) {
     fiches = newFiches;
+    $("#pokerSlider").slider('setAttribute', 'max', newFiches);
     //document.getElementById('fichesAmount').innerHTML = fichesConvert(fiches);
     document.getElementById('maxRaise').innerHTML = fichesConvert(fiches);
 }
 
 // Function: update call price (on page)
 function updateCall(newCall) {
+    $("#pokerSlider").slider('setAttribute', 'min', newCall);
     document.getElementById('currentCall').innerHTML = fichesConvert(newCall);
 }
 

@@ -277,10 +277,6 @@ namespace SouthValleyFive.Scripts.Poker
                 poker.Poker.OnPlayerLeaveTable(player);
                 //TODO: Empty the seat the player was occupying.
 
-                /*    if (SeatedPlayers.Count >= 2)
-                    {
-                        StartNextMatch();
-                    }   */
             }
             catch (Exception e)
             {
@@ -308,6 +304,15 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
 
+                foreach(PokerPlayer pokerPlayer in pokerTableManager.SeatedPlayers){
+
+                    if(pokerPlayer.Name != player.Name)
+                    {
+                        pokerPlayer.playerObject.SendChatMessage(player.Name+" Ha fatto Call.");
+                    }
+
+                }
+
                 playerPoker.playerObject.SendChatMessage("Hai fatto Call.");
                 pokerTableManager.playerPlaying = false;
                 pokerTableManager.source.Cancel();
@@ -317,7 +322,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 playerPoker.Call(pokerTableManager.MainPot);
                 // CLIENTSIDE -> FRONTEND INTERFACE
-                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager.MainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager.MainPot.getMaximumAmountPutIn() + "}");
+                updateraises(pokerTableManager);
                 player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager.MainPot.Amount + ", 'action': 'Call'}");
                 //Browser.ExecuteJsFunction("OnPlayerRaiseUpdated({minRaise:"+ MainPot.MinimumRaise +", maxRaise:"+ MainPot.getMaximumAmountPutIn() +"});");
                 //Browser.ExecuteJsFunction("OnPlayerPlayed({updatedPot:"+ MainPot.Amount +", action:'Call'});");
@@ -349,7 +354,20 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
 
+                foreach (PokerPlayer pokerPlayer in pokerTableManager.SeatedPlayers)
+                {
+
+                    if (pokerPlayer.Name != player.Name)
+                    {
+                        pokerPlayer.playerObject.SendChatMessage(player.Name + " Ha fatto un raise di "+ fiches+"$.");
+                    }
+
+                }
+
                 playerPoker.Raise(fiches, pokerTableManager.MainPot);
+                pokerTableManager.MainPot.AgressorIndex = pokerTableManager._currentIndex;
+
+                NAPI.Util.ConsoleOutput("Aggressor index is now "+ pokerTableManager._currentIndex);
                 playerPoker.playerObject.SendChatMessage("Hai Fatto un raise di " + fiches + ".");
                 pokerTableManager.playerPlaying = false;
                 pokerTableManager.source.Cancel();
@@ -357,7 +375,7 @@ namespace SouthValleyFive.Scripts.Poker
 
 
                 // CLIENTSIDE -> FRONTEND INTERFACE
-                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager.MainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager.MainPot.getMaximumAmountPutIn() + "}");
+                updateraises(pokerTableManager);
                 player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager.MainPot.Amount + ", 'action': 'Raise'}");
             }
             catch (Exception e)
@@ -366,11 +384,22 @@ namespace SouthValleyFive.Scripts.Poker
             }
 
         }
+
+        private void updateraises(PokerTableManager pokerTableManager)
+        {
+            int amount = 0;
+            foreach(PokerPlayer player in pokerTableManager)
+            {
+                amount = (pokerTableManager.MainPot.MinimumRaise*2)-player.AmountInPot;
+                player.playerObject.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager.MainPot.MinimumRaise + ", 'maxRaise': " + player.ChipStack + "}");
+            }
+        }
+
         /*mp.events.add({
-            "PokerRaiseEvent": fiches => {
-                PlayerRaise(fiches)
-            },
-        })*/
+   "PokerRaiseEvent": fiches => {
+       PlayerRaise(fiches)
+   },
+})*/
         [RemoteEvent("PokerFoldEvent")]
         public void PlayerFold(Player player)
         {
@@ -392,8 +421,23 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
 
+                foreach (PokerPlayer pokerPlayer in pokerTableManager.SeatedPlayers)
+                {
+
+                    if (pokerPlayer.Name != player.Name)
+                    {
+                        pokerPlayer.playerObject.SendChatMessage(player.Name + " Ha foldato.");
+                    }
+
+                }
+
                 playerPoker.Fold(pokerTableManager.MainPot);
+                playerPoker.folded = true;
                 playerPoker.playerObject.SendChatMessage("Hai Foldato.");
+                pokerTableManager.activePlayers[GetCurrentIndex()].folded = true;
+
+                NAPI.Util.ConsoleOutput("Player Folded. == "+pokerTableManager.activePlayers[GetCurrentIndex()].folded);
+
 
                 NAPI.Util.ConsoleOutput("Player Folded.");
                 pokerTableManager.playerPlaying = false;
@@ -404,7 +448,7 @@ namespace SouthValleyFive.Scripts.Poker
                 //Set bool playing to false
 
                 // CLIENTSIDE -> FRONTEND INTERFACE
-                player.TriggerEvent("OnPlayerRaiseUpdated", "{'minRaise': " + pokerTableManager.MainPot.MinimumRaise + ", 'maxRaise': " + pokerTableManager.MainPot.getMaximumAmountPutIn() + "}");
+                updateraises(pokerTableManager);
                 player.TriggerEvent("OnPlayerPlayed", "{'updatedPot': " + pokerTableManager.MainPot.Amount + ", 'action': 'Fold'}");
             }
             catch (Exception e)
@@ -514,6 +558,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 //SECOND ROUND OF BETTING
                 //
+                await SecondBetAsync();
 
                 //THE TURN
                 //The dealer burns another card, and then adds a fourth card face-up to the community cards.
@@ -534,6 +579,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 //THIRD ROUND OF BETTING
                 //
+                await ThirdBetAsync();
 
                 //THE RIVER
                 //The dealer burns another card, and then adds a fifth and final card to the community cards. 
@@ -555,6 +601,7 @@ namespace SouthValleyFive.Scripts.Poker
 
                 //FINAL ROUND OF BETTING
                 //
+                await FinalBetAsync();
 
 
 
@@ -572,14 +619,93 @@ namespace SouthValleyFive.Scripts.Poker
 
         public async Task FirstBetAsync()
         {
-            foreach (PokerPlayer pokerPlayer in activePlayers)
+            while (BeginNextTurn())
             {
                 IncrementIndex(_currentIndex);
                 await TimeOut(token);
-
             }
             return;
         }
+
+        public async Task SecondBetAsync()
+        {
+            while (BeginNextTurn())
+            {
+                IncrementIndex(_currentIndex);
+                await TimeOut(token);
+            }
+            return;
+        }
+
+        public async Task ThirdBetAsync()
+        {
+            while (BeginNextTurn())
+            {
+                IncrementIndex(_currentIndex);
+                await TimeOut(token);
+            }
+            return;
+        }
+
+        public async Task FinalBetAsync()
+        {
+            while (BeginNextTurn())
+            {
+                IncrementIndex(_currentIndex);
+                await TimeOut(token);
+            }
+            return;
+        }
+
+
+        //Check if everyone (except foldeds and all ins) have the same amount in pot
+        public bool isCurrentBettingRoundOver()
+        {
+            int index = GetCurrentIndex();
+            int offset = 1;
+
+            NAPI.Util.ConsoleOutput("CurrentIndex = "+index+", Aggressor Index = "+MainPot.AgressorIndex+",Player Folded = "+activePlayers[index].folded+", Player Count = "+activePlayers.Count());
+
+            while (activePlayers[MainPot.AgressorIndex].IsFolded() && _currentIndex != MainPot.AgressorIndex)
+                MainPot.AgressorIndex = DecrementIndex(MainPot.AgressorIndex);
+            if (_currentIndex == MainPot.AgressorIndex && TurnCounter > 1)
+            {
+                NAPI.Util.ConsoleOutput("false");
+                return false;
+            }
+            else if (EveryoneAllIn())
+            {
+                NAPI.Util.ConsoleOutput("false");
+                return false;
+            }
+            else
+            {
+                NAPI.Util.ConsoleOutput("true");
+                return true;
+            }
+
+            /*while (activePlayers[index].isbusted || activePlayers[index].IsFolded())
+            {
+                NAPI.Util.ConsoleOutput("Player at "+index+" is Folded/Busted");
+                index--;
+                index %= activePlayers.Count();
+                offset++;
+                offset %= activePlayers.Count();
+            }
+
+            if((index+offset)%activePlayers.Count == MainPot.AgressorIndex)
+            {
+                if (activePlayers[index].AmountInPot == activePlayers[MainPot.AgressorIndex].AmountInPot)
+                {
+                    return true;
+                }
+            } */
+
+
+            //return false;
+        }
+
+
 
         public async Task WaitGameStart()
         {
@@ -596,6 +722,9 @@ namespace SouthValleyFive.Scripts.Poker
                 if (count >= seconds)
                 {
                     NAPI.Util.ConsoleOutput("Timed Out.");
+                    activePlayers[_currentIndex].Fold(MainPot);
+                    activePlayers[_currentIndex].folded = true;
+
                     playerPlaying = false;
                     return;
                 }
@@ -603,7 +732,7 @@ namespace SouthValleyFive.Scripts.Poker
                 {
                     await Task.Delay(1000, token);
                     count++;
-                    NAPI.Util.ConsoleOutput(count.ToString());
+                 //   NAPI.Util.ConsoleOutput(count.ToString());
                 }
             }
 
@@ -632,7 +761,11 @@ namespace SouthValleyFive.Scripts.Poker
             else if (EveryoneAllIn())
                 return false;
             else
+            {
+                NAPI.Util.ConsoleOutput("Current betting round is over.");
                 return true;
+            }
+                
         }
         //method to determine if every player has already went all in
         public bool EveryoneAllIn()
@@ -676,7 +809,6 @@ namespace SouthValleyFive.Scripts.Poker
             Player player = activePlayers.GetPlayer(ref currentIndex).playerObject;
             // CLIENTSIDE -> FRONTEND
             int callValue = activePlayers.GetPlayer(ref currentIndex).GetAmountToCall(MainPot);
-            NAPI.Util.ConsoleOutput("AMOUNT TO CALL FOR INDEX "+currentIndex+"= "+callValue);
             ////Browser.ExecuteJsFunction($"OnPlayerTurn(callValue)");
             ////Browser.ExecuteJsFunction($"ShowCards()");
             player.TriggerEvent("OnPlayerTurn", callValue);
@@ -883,6 +1015,7 @@ namespace SouthValleyFive.Scripts.Poker
                     }
                 }
             }
+            activePlayers.Clear();
             IsActive = false;
         }
         //check if it is necessary to create sidepots

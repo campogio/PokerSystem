@@ -16,7 +16,7 @@ public class PokerPlayer : INotifyPropertyChanged
     protected string name;
     protected int chipStack;
     protected int amountInPot;
-    protected bool folded;
+    public bool folded;
     protected int amountContributed;
     protected int initialStack;
     protected string message;
@@ -39,6 +39,7 @@ public class PokerPlayer : INotifyPropertyChanged
             InvokePropertyChanged(new PropertyChangedEventArgs("ChipStack"));
         }
     }
+
     public event PropertyChangedEventHandler PropertyChanged;
     public void InvokePropertyChanged(PropertyChangedEventArgs e)
     {

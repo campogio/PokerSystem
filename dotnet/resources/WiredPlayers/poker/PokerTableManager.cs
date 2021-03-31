@@ -233,15 +233,13 @@ namespace SouthValleyFive.Scripts.Poker
                     NAPI.Util.ConsoleOutput(player.Name + " JOINED TABLE, PLAYER COUNT = " + SeatedPlayers.Count + " ID TABLE = " + id);
                     string json = "{'fiches': " + amount + ", 'pot': " + MainPot.Amount + ", 'playerName': '" + player.Name + "', 'tableCards': '" + TableHand + "'}";
 
-                    if (SeatedPlayers.Count >= 2)
+                    if (SeatedPlayers.Count >= 2 && !IsActive)
                     {
 
                         player.TriggerEvent("JoinTable", json);
-                        if (IsActive == false)
-                        {
-                            StartNextMatch();
-                            player.TriggerEvent("StartNextMatch");
-                        }
+                        StartNextMatch();
+                        player.TriggerEvent("StartNextMatch");
+                      
                     }
                     else
                     {
@@ -422,10 +420,11 @@ namespace SouthValleyFive.Scripts.Poker
         /// players/counter variables are reset
         /// blinds are reset if necessary.
         /// </summary>
-        public void StartNextMatch()
+        public async void StartNextMatch()
         {
-            setActivePlayers(SeatedPlayers);
             IsActive = true;
+            await WaitGameStart();
+            setActivePlayers(SeatedPlayers);
             activePlayers.ResetPlayers();
             CardDeck = new Deck();
             if (RoundCounter == 10)
@@ -580,6 +579,11 @@ namespace SouthValleyFive.Scripts.Poker
 
             }
             return;
+        }
+
+        public async Task WaitGameStart()
+        {
+            await Task.Delay(10000);
         }
 
         public async Task TimeOut(CancellationToken cancelToken)

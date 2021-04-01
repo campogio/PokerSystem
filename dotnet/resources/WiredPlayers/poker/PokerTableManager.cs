@@ -619,6 +619,7 @@ namespace SouthValleyFive.Scripts.Poker
 
         public async Task FirstBetAsync()
         {
+            _currentIndex = _dealerPosition + 3;
             while (BeginNextTurn())
             {
                 IncrementIndex(_currentIndex);
@@ -629,6 +630,7 @@ namespace SouthValleyFive.Scripts.Poker
 
         public async Task SecondBetAsync()
         {
+            _currentIndex = _dealerPosition;
             while (BeginNextTurn())
             {
                 IncrementIndex(_currentIndex);
@@ -639,6 +641,7 @@ namespace SouthValleyFive.Scripts.Poker
 
         public async Task ThirdBetAsync()
         {
+            _currentIndex = _dealerPosition;
             while (BeginNextTurn())
             {
                 IncrementIndex(_currentIndex);
@@ -649,6 +652,7 @@ namespace SouthValleyFive.Scripts.Poker
 
         public async Task FinalBetAsync()
         {
+            _currentIndex = _dealerPosition;
             while (BeginNextTurn())
             {
                 IncrementIndex(_currentIndex);
@@ -753,7 +757,6 @@ namespace SouthValleyFive.Scripts.Poker
         /// <returns></returns>
         public bool BeginNextTurn()
         {
-            TurnCounter++;
             while (activePlayers[MainPot.AgressorIndex].IsFolded() && _currentIndex != MainPot.AgressorIndex)
                 MainPot.AgressorIndex = DecrementIndex(MainPot.AgressorIndex);
             if (_currentIndex == MainPot.AgressorIndex && TurnCounter > 1)
@@ -762,6 +765,7 @@ namespace SouthValleyFive.Scripts.Poker
                 return false;
             else
             {
+                TurnCounter++;
                 NAPI.Util.ConsoleOutput("Current betting round is over.");
                 return true;
             }
